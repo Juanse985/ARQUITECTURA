@@ -1,0 +1,163 @@
+# ============================================================================
+# ARCHIVO: docker/docker-compose.yml
+# BASE DE DATOS: saasCloudDb
+# CASO 8: CLOUD NATIVE - CLÚSTER DISTRIBUIDO EN CONTENEDORES (NOMENCLATURA CAMELCASE)
+# ----------------------------------------------------------------------------
+# Arranque (desde esta carpeta docker/):
+#   docker compose up -d
+#   docker compose logs -f clusterInitializer     # ver la inicialización del clúster
+#   docker compose exec citusCoordinator psql -U postgres -d saasCloudDb -f /saasSql/ClusterDemo.sql
+# Apagar y borrar todo (para empezar de cero):
+#   docker compose down -v
+# ============================================================================
+
+name: saas-cloud-native-cluster
+
+# Configuración común de los 4 nodos PostgreSQL 16 + Citus 12.1
+x-citusNode: &citusNode
+  image: citusdata/citus:12.1.6
+  # wal_level=logical: necesario para mover shards en caliente (aislamiento Silo)
+  command: ["postgres", "-c", "wal_level=logical"]
+  healthcheck:
+    # -h 127.0.0.1: solo responde cuando el servidor definitivo acepta conexiones TCP
+    # (no durante la inicialización interna de la imagen)
+    test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d saasCloudDb"]
+    interval: 5s
+    timeout: 3s
+    retries: 30
+  networks:
+    - saasMesh
+
+x-clusterEnv: &clusterEnv
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SaasCloudNative2026!}
+  POSTGRES_DB: saasCloudDb
+
+services:
+  citusCoordinator:
+    <<: *citusNode
+    container_name: citusCoordinator
+    ports:
+      - "5432:5432"
+    environment:
+      <<: *clusterEnv
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:-SaasCloudNative2026!}
+    labels:
+      topology.kubernetes.io/zone: "us-east-1a"
+      nodeRole: "coordinator"
+    volumes:
+      - coordinatorData:/var/lib/postgresql/data
+      # Scripts y datos disponibles dentro del coordinador para demos manuales
+      - ../sql:/saasSql:ro
+      - ../data:/saasData:ro
+
+  nodeAz1Pool:
+    <<: *citusNode
+    container_name: nodeAz1Pool
+    environment:
+      <<: *clusterEnv
+    labels:
+      topology.kubernetes.io/zone: "us-east-1a"
+      nodeRole: "workerPool"
+    volumes:
+      - workerAz1Data:/var/lib/postgresql/data
+
+  nodeAz2Pool:
+    <<: *citusNode
+    container_name: nodeAz2Pool
+    environment:
+      <<: *clusterEnv
+    labels:
+      topology.kubernetes.io/zone: "us-east-1b"
+      nodeRole: "workerPool"
+    volumes:
+      - workerAz2Data:/var/lib/postgresql/data
+
+  nodeAz3Silo:
+    <<: *citusNode
+    container_name: nodeAz3Silo
+    environment:
+      <<: *clusterEnv
+    labels:
+      topology.kubernetes.io/zone: "us-east-1c"
+      nodeRole: "workerEnterpriseSilo"
+    volumes:
+      - workerAz3Data:/var/lib/postgresql/data
+
+  # Contenedor de un solo uso (equivale a un Job de Kubernetes): registra los workers,
+  # crea el modelo, distribuye las tablas, aplica RLS, carga los CSV y termina.
+  clusterInitializer:
+    image: citusdata/citus:12.1.6
+    container_name: clusterInitializer
+    # tr -d '\r' protege contra finales de línea de Windows (CRLF) en el script
+    entrypoint: ["bash", "-c", "tr -d '\\r' < /initCluster/InitSaasCluster.sh > /tmp/InitSaasCluster.sh && bash /tmp/InitSaasCluster.sh"]
+    environment:
+      <<: *clusterEnv
+      SAAS_APP_PASSWORD: ${SAAS_APP_PASSWORD:-SaasAppRuntime2026!}
+      SAAS_SQL_DIR: /saasSql
+    volumes:
+      - ./initCluster:/initCluster:ro
+      - ../sql:/saasSql:ro
+      - ../data:/saasData:ro
+    depends_on:
+      citusCoordinator:
+        condition: service_healthy
+      nodeAz1Pool:
+        condition: service_healthy
+      nodeAz2Pool:
+        condition: service_healthy
+      nodeAz3Silo:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - saasMesh
+
+  pgBouncerPooler:
+    image: edoburu/pgbouncer:1.22.1-p0
+    container_name: pgBouncerPooler
+    ports:
+      - "6432:5432"
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-SaasCloudNative2026!}
+      DB_HOST: citusCoordinator
+      DB_NAME: saasCloudDb
+      # PostgreSQL 16 guarda las contraseñas en SCRAM: PgBouncer debe usar el mismo método
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 5000
+      DEFAULT_POOL_SIZE: 80
+      RESERVE_POOL_SIZE: 20
+    depends_on:
+      clusterInitializer:
+        condition: service_completed_successfully
+    networks:
+      - saasMesh
+
+  redisRateLimiter:
+    image: redis:7.2-alpine
+    container_name: redisRateLimiter
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redisData:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - saasMesh
+
+volumes:
+  coordinatorData:
+  workerAz1Data:
+  workerAz2Data:
+  workerAz3Data:
+  redisData:
+
+networks:
+  saasMesh:
+    driver: bridge

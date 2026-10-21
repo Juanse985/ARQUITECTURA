@@ -1,0 +1,18 @@
+# ============================================================================
+# ARCHIVO: kubernetes/StorageClass.yaml
+# CASO 8: CLOUD NATIVE - COORDINACIÓN DE ALMACENAMIENTO PERSISTENTE Y ZONAS (AZ)
+# ============================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd-multiaz-encrypted
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+parameters:
+  type: gp3
+  iops: "12000"
+  throughput: "500"
+  encrypted: "true"
+  fsType: ext4

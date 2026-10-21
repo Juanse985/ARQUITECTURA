@@ -1,0 +1,37 @@
+# ============================================================================
+# ARCHIVO: kubernetes/BackupCronJob.yaml
+# BASE DE DATOS: saasCloudDb
+# CASO 8: CLOUD NATIVE - AUTOMATIZACIÓN DE RESPALDOS Y CUMPLIMIENTO DE RPO / RTO
+# ============================================================================
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: citus-cluster-backup-pitr
+  namespace: saas-data-plane
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: saas-db-operator-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: pgbackrest-backup
+              image: citusdata/citus:12.1.6
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "[BACKUP] Creando punto de restauracion distribuido en saasCloudDb..."
+                  psql -h citusCoordinator -U postgres -d saasCloudDb -c "SELECT citus_create_restore_point('autoPitr_$(date +%Y%m%d_%H%M%S)');"
+                  echo "[BACKUP] Punto de restauracion consistente creado exitosamente."
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-credentials-secret
+                      key: password

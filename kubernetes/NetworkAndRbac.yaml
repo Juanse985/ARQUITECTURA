@@ -1,0 +1,75 @@
+# ============================================================================
+# ARCHIVO: kubernetes/NetworkAndRbac.yaml
+# CASO 8: CLOUD NATIVE - SEGURIDAD ZERO-TRUST EN RED Y RBAC DE KUBERNETES
+# ============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: isolate-database-cluster
+  namespace: saas-data-plane
+spec:
+  podSelector:
+    matchLabels:
+      tier: database
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: connectionPooler
+        - podSelector:
+            matchLabels:
+              tier: database
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              tier: database
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 443
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: saas-db-operator-sa
+  namespace: saas-data-plane
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: saas-db-operator-role
+  namespace: saas-data-plane
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "persistentvolumeclaims", "services", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: saas-db-operator-binding
+  namespace: saas-data-plane
+subjects:
+  - kind: ServiceAccount
+    name: saas-db-operator-sa
+    namespace: saas-data-plane
+roleRef:
+  kind: Role
+  name: saas-db-operator-role
+  apiGroup: rbac.authorization.k8s.io

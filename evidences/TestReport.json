@@ -1,0 +1,178 @@
+{
+  "databaseName": "saasCloudDb",
+  "executionTimestamp": "2026-10-21T01:23:16Z",
+  "environment": {
+    "pythonVersion": "Python 3.14.3",
+    "topology": "3 Availability Zones (nodeAz1Pool, nodeAz2Pool, nodeAz3Silo), 16 Hash Shards, RF=2"
+  },
+  "datasetSummary": {
+    "databaseName": "saasCloudDb",
+    "randomSeed": 20261020,
+    "catalogTotalOrganizations": 5000,
+    "tierBreakdown5000": {
+      "FREE": 3750,
+      "PRO": 1100,
+      "ENTERPRISE": 150
+    },
+    "activeClusterLoaded": {
+      "tenants": 120,
+      "users": 120,
+      "projects": 220,
+      "workOrders": 1710,
+      "invoices": 440
+    },
+    "generationAndLoadTimeSeconds": 26.203,
+    "clusterDistribution": {
+      "databaseName": "saasCloudDb",
+      "nodes": {
+        "nodeAz1Pool": {
+          "status": "UP",
+          "az": "us-east-1a",
+          "role": "POOL",
+          "primaryTenants": 61,
+          "primaryUsers": 61,
+          "primaryProjects": 112,
+          "primaryWorkOrders": 912,
+          "primaryInvoices": 0,
+          "replicaTenants": 59,
+          "replicaWorkOrders": 798
+        },
+        "nodeAz2Pool": {
+          "status": "UP",
+          "az": "us-east-1b",
+          "role": "POOL",
+          "primaryTenants": 59,
+          "primaryUsers": 59,
+          "primaryProjects": 108,
+          "primaryWorkOrders": 798,
+          "primaryInvoices": 0,
+          "replicaTenants": 61,
+          "replicaWorkOrders": 912
+        },
+        "nodeAz3Silo": {
+          "status": "UP",
+          "az": "us-east-1c",
+          "role": "SILO",
+          "primaryTenants": 0,
+          "primaryUsers": 0,
+          "primaryProjects": 0,
+          "primaryWorkOrders": 0,
+          "primaryInvoices": 0,
+          "replicaTenants": 0,
+          "replicaWorkOrders": 0
+        }
+      },
+      "totalTenants": 120,
+      "totalWorkOrders": 1710
+    }
+  },
+  "tests": {
+    "test01DistributionAndColocation": {
+      "status": "PASSED",
+      "totalActiveTenants": 120,
+      "totalWorkOrders": 1710,
+      "nodeAz1PrimaryTenants": 61,
+      "nodeAz2PrimaryTenants": 59,
+      "nodeAz1ReplicaTenants": 59,
+      "nodeAz2ReplicaTenants": 61
+    },
+    "test02RlsTenantIsolation": {
+      "status": "PASSED",
+      "legitimateTenantQueryRows": 12,
+      "crossTenantReadBlocked": true,
+      "missingTenantContextFailClosed": true,
+      "totalRlsBlocksRecorded": 2
+    },
+    "test03ZeroDowntimeOnboarding": {
+      "status": "PASSED",
+      "newTenantsOnboardedLive": 10,
+      "concurrentBackgroundReads": 100,
+      "backgroundErrorsDuringOnboarding": 0,
+      "onboardingAvgLatencyMs": 13.05,
+      "backgroundReadP95LatencyMs": 19.76
+    },
+    "test04IntegrityIdempotencyAndOcc": {
+      "status": "PASSED",
+      "idempotencyDuplicatePrevented": true,
+      "budgetOverrunRejectedAtomically": true,
+      "concurrentOccThreads": 10,
+      "occSuccessfulUpdates": 1,
+      "occConflictsRejected409": 9
+    },
+    "test05NoisyNeighborProtection": {
+      "status": "PASSED",
+      "noisyTenantBurstRequests": 80,
+      "noisyTenantAllowedRequests": 13,
+      "noisyTenantThrottledHttp429": 67,
+      "normalTenantRequestsCompleted": 20,
+      "normalTenantErrors": 0,
+      "normalTenantP95LatencyMs": 2.25
+    },
+    "test06WhaleTenantOnlineSiloIsolation": {
+      "status": "PASSED",
+      "details": {
+        "tenantId": "f67100f7-9318-5cc5-9a64-75eade9d6d6e",
+        "oldShardId": 13,
+        "oldPrimaryNode": "nodeAz2Pool",
+        "newShardId": 16,
+        "newPrimaryNode": "nodeAz3Silo",
+        "newReplicaNode": "nodeAz2Pool",
+        "isolationMode": "SILO",
+        "movedRecords": 67
+      },
+      "ordersBeforeMove": 60,
+      "ordersAfterMove": 60,
+      "zeroDataLoss": true
+    },
+    "test07ComponentFailoverAndGradualDeployment": {
+      "status": "PASSED",
+      "nodeFailoverEvent": {
+        "failedNode": "nodeAz1Pool",
+        "promotedShards": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14
+        ],
+        "newPrimaryNodes": [
+          "nodeAz2Pool"
+        ],
+        "rtoMs": 102.46,
+        "timestamp": "2026-10-21T01:23:17Z"
+      },
+      "tenantsVerifiedAvailableDuringOutage": 25,
+      "nodeRecoveryEvent": {
+        "recoveredNode": "nodeAz1Pool",
+        "status": "UP",
+        "resyncedShardsCount": 16,
+        "resyncTimeMs": 300.2
+      },
+      "rollingDeploymentAndSchemaMigration": {
+        "pattern": "Expand-Contract + RollingUpdate (maxUnavailable=0, maxSurge=2)",
+        "fromVersion": "v1.0.0",
+        "toVersion": "v2.0.0",
+        "newColumn": "slaDeadlineAt",
+        "backfilledWorkOrders": 1711,
+        "downtimeMs": 0.0,
+        "migrationDurationMs": 89.88
+      }
+    },
+    "test08BackupAndVerifiedRestore": {
+      "status": "PASSED",
+      "backupFilesCount": 6,
+      "backupDurationMs": 71.16,
+      "restoreInfo": {
+        "restoredFiles": 6,
+        "checksumVerified": true,
+        "rtoRestoreMs": 15.86
+      },
+      "ordersBeforeDisaster": 1711,
+      "ordersAfterRestore": 1711,
+      "rpoAchievedSeconds": 0
+    }
+  }
+}

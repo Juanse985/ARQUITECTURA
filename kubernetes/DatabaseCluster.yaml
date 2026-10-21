@@ -1,0 +1,134 @@
+# ============================================================================
+# ARCHIVO: kubernetes/DatabaseCluster.yaml
+# BASE DE DATOS: saasCloudDb
+# CASO 8: CLOUD NATIVE - CLÚSTER DISTRIBUIDO EN VARIAS ZONAS DE DISPONIBILIDAD
+# ============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: citus-workers-headless
+  namespace: saas-data-plane
+  labels:
+    app: citusWorker
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: citusWorker
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: citus-worker
+  namespace: saas-data-plane
+spec:
+  serviceName: "citus-workers-headless"
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  selector:
+    matchLabels:
+      app: citusWorker
+  template:
+    metadata:
+      labels:
+        app: citusWorker
+        tier: database
+    spec:
+      priorityClassName: database-critical-priority
+      terminationGracePeriodSeconds: 120
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: citusWorker
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - citusWorker
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: citus-worker
+          image: citusdata/citus:12.1.6
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "saasCloudDb"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials-secret
+                  key: password
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          resources:
+            requests:
+              cpu: "4"
+              memory: "16Gi"
+            limits:
+              cpu: "8"
+              memory: "32Gi"
+          startupProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "saasCloudDb"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "saasCloudDb"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "saasCloudDb"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          volumeMounts:
+            - name: pgDataPvc
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: pgDataPvc
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "fast-ssd-multiaz-encrypted"
+        resources:
+          requests:
+            storage: 500Gi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: citus-worker-pdb
+  namespace: saas-data-plane
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: citusWorker

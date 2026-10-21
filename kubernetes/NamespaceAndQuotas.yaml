@@ -1,0 +1,48 @@
+# ============================================================================
+# ARCHIVO: kubernetes/NamespaceAndQuotas.yaml
+# CASO 8: CLOUD NATIVE - AISLAMIENTO DE RECURSOS Y GOBERNANZA EN KUBERNETES
+# ============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: saas-data-plane
+  labels:
+    app.kubernetes.io/part-of: saasCloudPlatform
+    securityTier: restricted
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: data-plane-quota
+  namespace: saas-data-plane
+spec:
+  hard:
+    requests.cpu: "64"
+    requests.memory: "256Gi"
+    limits.cpu: "128"
+    limits.memory: "512Gi"
+    persistentvolumeclaims: "30"
+    requests.storage: "20Ti"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: saas-data-plane
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "2"
+        memory: "4Gi"
+      defaultRequest:
+        cpu: "500m"
+        memory: "1Gi"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: database-critical-priority
+value: 1000000
+globalDefault: false
+description: "Prioridad critica para nodos del cluster de base de datos saasCloudDb."

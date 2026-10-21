@@ -1,0 +1,79 @@
+# ============================================================================
+# ARCHIVO: kubernetes/PoolerAndRateLimiter.yaml
+# CASO 8: CLOUD NATIVE - MITIGACIÓN DE NOISY NEIGHBOR (POOLING + RATE LIMITING)
+# ============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pg-bouncer-pooler
+  namespace: saas-data-plane
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pgBouncerPooler
+  template:
+    metadata:
+      labels:
+        app: pgBouncerPooler
+        tier: connectionPooler
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: pgBouncerPooler
+      containers:
+        - name: pgbouncer
+          image: edoburu/pgbouncer:1.22.1-p0
+          ports:
+            - containerPort: 5432
+          env:
+            - name: DB_NAME
+              value: "saasCloudDb"
+            - name: POOL_MODE
+              value: "transaction"
+            - name: MAX_CLIENT_CONN
+              value: "5000"
+            - name: DEFAULT_POOL_SIZE
+              value: "80"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-rate-limiter
+  namespace: saas-data-plane
+spec:
+  serviceName: "redis-rate-limiter"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redisRateLimiter
+  template:
+    metadata:
+      labels:
+        app: redisRateLimiter
+        tier: cacheRateLimit
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.2-alpine
+          command: ["redis-server", "--appendonly", "yes", "--maxmemory", "2gb", "--maxmemory-policy", "volatile-lru"]
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"

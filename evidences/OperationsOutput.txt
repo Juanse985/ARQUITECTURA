@@ -1,0 +1,84 @@
+==============================================================================
+DEMOSTRACION DE OPERACIONES Y CONSULTAS REPRESENTATIVAS - saasCloudDb
+==============================================================================
+
+[1] ESTADO DE DISTRIBUCION POR NODO Y ZONA DE DISPONIBILIDAD (MULTI-AZ):
+{
+  "databaseName": "saasCloudDb",
+  "nodes": {
+    "nodeAz1Pool": {
+      "status": "UP",
+      "az": "us-east-1a",
+      "role": "POOL",
+      "primaryTenants": 0,
+      "primaryUsers": 0,
+      "primaryProjects": 0,
+      "primaryWorkOrders": 0,
+      "primaryInvoices": 0,
+      "replicaTenants": 129,
+      "replicaWorkOrders": 1651
+    },
+    "nodeAz2Pool": {
+      "status": "UP",
+      "az": "us-east-1b",
+      "role": "POOL",
+      "primaryTenants": 129,
+      "primaryUsers": 129,
+      "primaryProjects": 217,
+      "primaryWorkOrders": 1651,
+      "primaryInvoices": 0,
+      "replicaTenants": 66,
+      "replicaWorkOrders": 973
+    },
+    "nodeAz3Silo": {
+      "status": "UP",
+      "az": "us-east-1c",
+      "role": "SILO",
+      "primaryTenants": 1,
+      "primaryUsers": 1,
+      "primaryProjects": 4,
+      "primaryWorkOrders": 60,
+      "primaryInvoices": 0,
+      "replicaTenants": 0,
+      "replicaWorkOrders": 0
+    }
+  },
+  "totalTenants": 130,
+  "totalWorkOrders": 1711
+}
+
+[2] ONBOARDING AUTOMATIZADO ZERO-DOWNTIME (12.09 ms):
+{
+  "tenantId": "f8e0ee9c-2bef-5365-95d7-d37f3807f948",
+  "orgSlug": "org-sustentacion-uniminuto",
+  "planCode": "PRO",
+  "shardId": 13,
+  "primaryNode": "nodeAz2Pool",
+  "replicaNode": "nodeAz1Pool"
+}
+
+[3] CREACION TRANSACCIONAL E IDEMPOTENTE DE ORDEN DE TRABAJO:
+{
+  "orderId": "017393af-6d91-5b22-8824-5b049de70eb9",
+  "status": "PENDING",
+  "amountUsd": 3500.0,
+  "version": 1,
+  "idempotentReplay": false
+}
+
+[4] CONSULTA REPRESENTATIVA DE DASHBOARD CO-LOCALIZADO (3.33 ms):
+[
+  {
+    "orderId": "017393af-6d91-5b22-8824-5b049de70eb9",
+    "title": "Despliegue de Nodos Citus en 3 Zonas de Disponibilidad",
+    "priority": "CRITICAL",
+    "status": "PENDING",
+    "amountUsd": 3500.0,
+    "version": 1,
+    "customAttributes": "{\"costCenter\": \"CC-BOG-01\", \"slaHours\": 4}",
+    "projectCode": "PRJ-SUST-2026",
+    "projectName": "Modernizacion Cloud Native Regional",
+    "budgetAllocated": 25000.0,
+    "budgetConsumed": 3500.0
+  }
+]

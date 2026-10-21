@@ -1,0 +1,61 @@
+{
+  "databaseName": "saasCloudDb",
+  "randomSeed": 20261020,
+  "catalogTotalOrganizations": 5000,
+  "tierBreakdown5000": {
+    "FREE": 3750,
+    "PRO": 1100,
+    "ENTERPRISE": 150
+  },
+  "activeClusterLoaded": {
+    "tenants": 120,
+    "users": 120,
+    "projects": 220,
+    "workOrders": 1710,
+    "invoices": 440
+  },
+  "generationAndLoadTimeSeconds": 26.203,
+  "clusterDistribution": {
+    "databaseName": "saasCloudDb",
+    "nodes": {
+      "nodeAz1Pool": {
+        "status": "UP",
+        "az": "us-east-1a",
+        "role": "POOL",
+        "primaryTenants": 61,
+        "primaryUsers": 61,
+        "primaryProjects": 112,
+        "primaryWorkOrders": 912,
+        "primaryInvoices": 0,
+        "replicaTenants": 59,
+        "replicaWorkOrders": 798
+      },
+      "nodeAz2Pool": {
+        "status": "UP",
+        "az": "us-east-1b",
+        "role": "POOL",
+        "primaryTenants": 59,
+        "primaryUsers": 59,
+        "primaryProjects": 108,
+        "primaryWorkOrders": 798,
+        "primaryInvoices": 0,
+        "replicaTenants": 61,
+        "replicaWorkOrders": 912
+      },
+      "nodeAz3Silo": {
+        "status": "UP",
+        "az": "us-east-1c",
+        "role": "SILO",
+        "primaryTenants": 0,
+        "primaryUsers": 0,
+        "primaryProjects": 0,
+        "primaryWorkOrders": 0,
+        "primaryInvoices": 0,
+        "replicaTenants": 0,
+        "replicaWorkOrders": 0
+      }
+    },
+    "totalTenants": 120,
+    "totalWorkOrders": 1710
+  }
+}
