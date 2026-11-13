@@ -1,0 +1,60 @@
+@use '@angular/material' as mat;
+@use 'theme-colors' as colors;
+@use 'variables' as v;
+
+// Tema Material 3 personalizado con la paleta institucional.
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: (
+      primary: colors.$primary-palette,
+      tertiary: colors.$tertiary-palette,
+      theme-type: light,
+    ),
+    typography: (
+      plain-family: v.$fuente-base,
+      brand-family: v.$fuente-base,
+    ),
+    density: 0,
+  ));
+
+  // Forzamos el azul exacto institucional como color primario del sistema.
+  --mat-sys-primary: #{v.$azul-800};
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-tertiary: #{v.$dorado-500};
+  --mat-sys-on-tertiary: #{v.$azul-900};
+  --mat-sys-surface: #ffffff;
+  --mat-sys-background: #{v.$azul-50};
+
+  // Toolbar azul
+  @include mat.toolbar-overrides((
+    container-background-color: v.$azul-logo,
+    container-text-color: #ffffff,
+  ));
+
+  // Tarjetas con bordes suaves
+  @include mat.card-overrides((
+    elevated-container-shape: v.$radio-tarjeta,
+    outlined-container-shape: v.$radio-tarjeta,
+  ));
+
+  // Stepper con íconos azules / dorado al completar
+  @include mat.stepper-overrides((
+    header-selected-state-icon-background-color: v.$azul-800,
+    header-done-state-icon-background-color: v.$dorado-500,
+    header-done-state-icon-foreground-color: v.$azul-900,
+    header-edit-state-icon-background-color: v.$azul-700,
+  ));
+
+  @include mat.progress-bar-overrides((
+    active-indicator-color: v.$azul-800,
+    track-color: v.$azul-100,
+  ));
+}
+
+// Botón de acción secundaria en amarillo/dorado
+.btn-accent.mat-mdc-unelevated-button:not(:disabled),
+.btn-accent.mat-mdc-raised-button:not(:disabled) {
+  background-color: v.$dorado-500 !important;
+  color: v.$azul-900 !important;
+}

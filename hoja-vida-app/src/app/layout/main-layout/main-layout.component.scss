@@ -1,0 +1,47 @@
+@use 'variables' as v;
+
+:host { display: flex; flex-direction: column; height: 100vh; }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 3000;
+  background: v.$dorado-500; color: v.$azul-900; padding: 8px 16px; font-weight: 700;
+  &:focus { left: 8px; top: 8px; }
+}
+
+.toolbar {
+  position: sticky; top: 0; z-index: 10; gap: 8px;
+  border-bottom: 4px solid v.$dorado-500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.marca {
+  display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none;
+  .nombre { display: flex; flex-direction: column; line-height: 1.15; }
+  strong { font-size: 1.15rem; letter-spacing: 1px; }
+  small { font-size: 0.72rem; opacity: 0.85; font-weight: 400; }
+  .separador { width: 1px; height: 32px; background: rgba(255, 255, 255, 0.35); }
+}
+.spacer { flex: 1; }
+.usuario { color: #fff !important; }
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%; margin-right: 8px;
+  background: v.$dorado-500; color: v.$azul-900; font-weight: 700; font-size: 0.8rem;
+}
+.menu-header { opacity: 1 !important; }
+
+.contenedor { flex: 1; background: v.$azul-50; }
+.sidenav {
+  width: 260px; border-right: none; background: #fff;
+  box-shadow: 2px 0 8px rgba(6, 26, 64, 0.06);
+  .activo { background: v.$azul-100; border-left: 4px solid v.$dorado-500; }
+  .activo mat-icon { color: v.$azul-800; }
+}
+.sidenav-nota {
+  display: flex; gap: 8px; align-items: center; margin: 16px; padding: 12px;
+  border-radius: 10px; background: v.$dorado-100; color: #6b4f00;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+}
+.contenido { display: flex; flex-direction: column; min-height: 100%; }
+main { flex: 1; width: 100%; outline: none; }
+
+.subheader { color: v.$azul-800 !important; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }

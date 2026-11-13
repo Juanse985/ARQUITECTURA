@@ -1,0 +1,226 @@
+<app-page-title titulo="Mi hoja de vida" subtitulo="Consulta y administra la información registrada." icono="badge">
+  @if (hv()) {
+    <a mat-button routerLink="/hoja-vida/formato"><mat-icon>print</mat-icon> Formato oficial</a>
+    <a mat-flat-button routerLink="/hoja-vida/editar"><mat-icon>edit</mat-icon> Editar</a>
+  }
+</app-page-title>
+
+@if (cargado()) {
+  @if (hv(); as h) {
+    <div class="estado">
+      <span class="chip" [class.chip-accent]="h.estado === 'BORRADOR'">{{ h.estado === 'COMPLETA' ? 'Completa' : 'Borrador' }}</span>
+      <span>Completitud: <b>{{ hvService.porcentajeTotal() }}%</b></span>
+      <mat-progress-bar mode="determinate" [value]="hvService.porcentajeTotal()" aria-label="Completitud total" />
+    </div>
+
+    <div class="dos">
+      <mat-card appearance="outlined" class="seccion">
+        <div class="cab">
+          <mat-icon class="ico">school</mat-icon><h2>Vinculación con {{ inst.sigla() }}</h2><span class="spacer"></span>
+          <button mat-icon-button (click)="editar(0)" matTooltip="Editar" aria-label="Editar vinculación"><mat-icon>edit</mat-icon></button>
+        </div>
+        @if (h.institucional; as i) {
+          <dl class="datos">
+            <div><dt>Tipo</dt><dd>{{ etiquetaVinculacion(i.tipoVinculacion) }}</dd></div>
+            <div><dt>Sede</dt><dd>{{ inst.nombreSede(i.sedeId) || '—' }}</dd></div>
+            <div><dt>Programa</dt><dd>{{ inst.nombrePrograma(i.programaId) || '—' }}</dd></div>
+            <div><dt>Profesión</dt><dd>{{ i.profesion || '—' }}</dd></div>
+            <div><dt>Área de conocimiento</dt><dd>{{ etiquetaArea(i.areaConocimiento) }}</dd></div>
+            <div><dt>Nivel máximo</dt><dd>{{ nivel() }}</dd></div>
+          </dl>
+          @if (alineado() !== null) {
+            <p class="chip" [class.chip-accent]="!alineado()">
+              {{ alineado() ? 'Formación alineada con el programa donde enseña' : 'Formación en un área distinta al programa donde enseña' }}
+            </p>
+          }
+        } @else {
+          <p class="vacio">Sin diligenciar.</p>
+        }
+      </mat-card>
+
+      <mat-card appearance="outlined" class="seccion">
+        <div class="cab">
+          <mat-icon class="ico">attach_file</mat-icon><h2>Hoja de vida original</h2><span class="spacer"></span>
+          <a mat-icon-button routerLink="/hoja-vida/importar" matTooltip="Subir / reemplazar" aria-label="Subir o reemplazar archivo"><mat-icon>upload_file</mat-icon></a>
+        </div>
+        @if (h.archivoOriginal; as a) {
+          <p><b>{{ a.nombre }}</b> · {{ a.formato }} · {{ (a.tamano / 1024).toFixed(0) }} KB</p>
+          <p>Cargado el {{ a.fechaCarga | fechaCo }} {{ a.procesadoConIa ? '· procesado con IA (Gemini)' : '' }}</p>
+          <div class="botones">
+            @if (a.url) {
+              <a mat-stroked-button [href]="a.url" [attr.download]="a.nombre"><mat-icon>download</mat-icon> Descargar</a>
+            }
+            <button mat-button class="borrar" type="button" (click)="eliminarArchivo()"><mat-icon>delete</mat-icon> Quitar</button>
+          </div>
+        } @else {
+          <p class="vacio">No has adjuntado tu hoja de vida en otro formato.</p>
+          <a mat-stroked-button routerLink="/hoja-vida/importar"><mat-icon>auto_awesome</mat-icon> Importar PDF / Word / imagen</a>
+        }
+      </mat-card>
+    </div>
+
+    <!-- 1. DATOS PERSONALES -->
+    <mat-card appearance="outlined" class="seccion">
+      <div class="cab">
+        <span class="num">1</span><h2>Datos personales</h2><span class="spacer"></span>
+        <button mat-icon-button (click)="editar(0)" matTooltip="Editar" aria-label="Editar datos personales"><mat-icon>edit</mat-icon></button>
+      </div>
+      @if (dp(); as d) {
+        <div class="perfil">
+          <div class="foto">
+            @if (d.fotoUrl) { <img [src]="d.fotoUrl" alt="Foto" /> } @else { <mat-icon>account_circle</mat-icon> }
+          </div>
+          <dl class="datos">
+            <div><dt>Nombre completo</dt><dd>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</dd></div>
+            <div><dt>Documento</dt><dd>{{ d.tipoDocumento | catalogoLabel: c.tiposDocumento }} {{ d.numeroDocumento }}</dd></div>
+            <div><dt>Sexo</dt><dd>{{ d.sexo | catalogoLabel: c.sexos : true }}</dd></div>
+            <div><dt>Nacionalidad</dt><dd>{{ d.nacionalidad | catalogoLabel: c.nacionalidades }} {{ d.paisNacionalidad ? '(' + d.paisNacionalidad + ')' : '' }}</dd></div>
+            @if (d.sexo === 'M' && d.libretaMilitar.numero) {
+              <div><dt>Libreta militar</dt><dd>{{ d.libretaMilitar.clase | catalogoLabel: c.clasesLibreta }} · No. {{ d.libretaMilitar.numero }} · D.M. {{ d.libretaMilitar.distritoMilitar }}</dd></div>
+            }
+            <div><dt>Nacimiento</dt><dd>{{ d.fechaNacimiento | fechaCo }} · {{ lugarNac().municipio }}, {{ lugarNac().departamento }} ({{ lugarNac().pais }})</dd></div>
+            <div><dt>Correspondencia</dt><dd>{{ d.direccionCorrespondencia }} · {{ ubicCorr().municipio }}, {{ ubicCorr().departamento }}</dd></div>
+            <div><dt>Teléfono</dt><dd>{{ d.telefono }}</dd></div>
+            <div><dt>E-mail</dt><dd>{{ d.email }}</dd></div>
+          </dl>
+        </div>
+      } @else {
+        <p class="vacio">Sin diligenciar.</p>
+      }
+    </mat-card>
+
+    <!-- 2. FORMACIÓN ACADÉMICA -->
+    <mat-card appearance="outlined" class="seccion">
+      <div class="cab">
+        <span class="num">2</span><h2>Formación académica</h2><span class="spacer"></span>
+        <button mat-icon-button (click)="editar(1)" matTooltip="Editar" aria-label="Editar formación académica"><mat-icon>edit</mat-icon></button>
+      </div>
+      <h3>Educación básica y media</h3>
+      @if (h.educacionBasica; as eb) {
+        <p>Último grado aprobado: <b>{{ eb.ultimoGrado }}º</b> · {{ eb.titulo || 'Sin título registrado' }} · Grado: {{ mesAnio(eb.mesGrado, eb.anioGrado) }}</p>
+      } @else {
+        <p class="vacio">Sin diligenciar.</p>
+      }
+
+      <h3>Educación superior</h3>
+      @if (h.educacionSuperior.length) {
+        <div class="tabla-wrap">
+          <table mat-table [dataSource]="h.educacionSuperior" aria-label="Educación superior">
+            <ng-container matColumnDef="modalidad"><th mat-header-cell *matHeaderCellDef>Modalidad</th>
+              <td mat-cell *matCellDef="let e" [attr.title]="e.modalidad | catalogoLabel: c.modalidades : true">{{ e.modalidad }}</td></ng-container>
+            <ng-container matColumnDef="titulo"><th mat-header-cell *matHeaderCellDef>Título / estudios</th><td mat-cell *matCellDef="let e">{{ e.titulo }}@if (e.institucion) {<br /><small class="ies">{{ e.institucion }}</small>}</td></ng-container>
+            <ng-container matColumnDef="semestres"><th mat-header-cell *matHeaderCellDef>Semestres</th><td mat-cell *matCellDef="let e">{{ e.semestresAprobados }}</td></ng-container>
+            <ng-container matColumnDef="graduado"><th mat-header-cell *matHeaderCellDef>Graduado</th><td mat-cell *matCellDef="let e">{{ e.graduado ? 'Sí' : 'No' }}</td></ng-container>
+            <ng-container matColumnDef="terminacion"><th mat-header-cell *matHeaderCellDef>Terminación</th><td mat-cell *matCellDef="let e">{{ mesAnio(e.mesTerminacion, e.anioTerminacion) }}</td></ng-container>
+            <ng-container matColumnDef="acciones"><th mat-header-cell *matHeaderCellDef><span class="sr-only">Acciones</span></th>
+              <td mat-cell *matCellDef="let e">
+                <button mat-icon-button (click)="editar(1)" matTooltip="Editar" [attr.aria-label]="'Editar ' + e.titulo"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="borrar" (click)="eliminarItem('educacion-superior', e.id, e.titulo)" matTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + e.titulo"><mat-icon>delete</mat-icon></button>
+              </td></ng-container>
+            <tr mat-header-row *matHeaderRowDef="colEstudios"></tr>
+            <tr mat-row *matRowDef="let r; columns: colEstudios"></tr>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">No hay estudios registrados.</p>
+      }
+
+      <h3>Idiomas</h3>
+      @if (h.idiomas.length) {
+        <div class="tabla-wrap">
+          <table mat-table [dataSource]="h.idiomas" aria-label="Idiomas">
+            <ng-container matColumnDef="idioma"><th mat-header-cell *matHeaderCellDef>Idioma</th><td mat-cell *matCellDef="let i">{{ i.idioma }}</td></ng-container>
+            <ng-container matColumnDef="habla"><th mat-header-cell *matHeaderCellDef>Lo habla</th><td mat-cell *matCellDef="let i">{{ i.habla | catalogoLabel: c.nivelesIdioma : true }}</td></ng-container>
+            <ng-container matColumnDef="lee"><th mat-header-cell *matHeaderCellDef>Lo lee</th><td mat-cell *matCellDef="let i">{{ i.lee | catalogoLabel: c.nivelesIdioma : true }}</td></ng-container>
+            <ng-container matColumnDef="escribe"><th mat-header-cell *matHeaderCellDef>Lo escribe</th><td mat-cell *matCellDef="let i">{{ i.escribe | catalogoLabel: c.nivelesIdioma : true }}</td></ng-container>
+            <ng-container matColumnDef="acciones"><th mat-header-cell *matHeaderCellDef><span class="sr-only">Acciones</span></th>
+              <td mat-cell *matCellDef="let i">
+                <button mat-icon-button (click)="editar(1)" matTooltip="Editar" [attr.aria-label]="'Editar ' + i.idioma"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="borrar" (click)="eliminarItem('idiomas', i.id, i.idioma)" matTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + i.idioma"><mat-icon>delete</mat-icon></button>
+              </td></ng-container>
+            <tr mat-header-row *matHeaderRowDef="colIdiomas"></tr>
+            <tr mat-row *matRowDef="let r; columns: colIdiomas"></tr>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">No hay idiomas registrados.</p>
+      }
+    </mat-card>
+
+    <!-- 3. EXPERIENCIA LABORAL -->
+    <mat-card appearance="outlined" class="seccion">
+      <div class="cab">
+        <span class="num">3</span><h2>Experiencia laboral</h2><span class="spacer"></span>
+        <button mat-icon-button (click)="editar(2)" matTooltip="Editar" aria-label="Editar experiencia laboral"><mat-icon>edit</mat-icon></button>
+      </div>
+      @if (h.experienciaLaboral.length) {
+        <div class="tabla-wrap">
+          <table mat-table [dataSource]="h.experienciaLaboral" aria-label="Experiencia laboral">
+            <ng-container matColumnDef="empresa"><th mat-header-cell *matHeaderCellDef>Empresa o entidad</th><td mat-cell *matCellDef="let e">{{ e.empresa }}</td></ng-container>
+            <ng-container matColumnDef="tipo"><th mat-header-cell *matHeaderCellDef>Tipo</th><td mat-cell *matCellDef="let e">{{ e.tipoEntidad | catalogoLabel: c.tiposEntidad }}</td></ng-container>
+            <ng-container matColumnDef="cargo"><th mat-header-cell *matHeaderCellDef>Cargo</th><td mat-cell *matCellDef="let e">{{ e.cargo }}</td></ng-container>
+            <ng-container matColumnDef="ingreso"><th mat-header-cell *matHeaderCellDef>Ingreso</th><td mat-cell *matCellDef="let e">{{ e.fechaIngreso | fechaCo }}</td></ng-container>
+            <ng-container matColumnDef="retiro"><th mat-header-cell *matHeaderCellDef>Retiro</th>
+              <td mat-cell *matCellDef="let e">@if (e.empleoActual) { <span class="chip chip-accent">Actual</span> } @else { {{ e.fechaRetiro | fechaCo }} }</td></ng-container>
+            <ng-container matColumnDef="acciones"><th mat-header-cell *matHeaderCellDef><span class="sr-only">Acciones</span></th>
+              <td mat-cell *matCellDef="let e">
+                <button mat-icon-button (click)="editar(2)" matTooltip="Editar" [attr.aria-label]="'Editar ' + e.empresa"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="borrar" (click)="eliminarItem('experiencia', e.id, e.empresa)" matTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + e.empresa"><mat-icon>delete</mat-icon></button>
+              </td></ng-container>
+            <tr mat-header-row *matHeaderRowDef="colExp"></tr>
+            <tr mat-row *matRowDef="let r; columns: colExp"></tr>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">No hay experiencia laboral registrada.</p>
+      }
+    </mat-card>
+
+    <div class="dos">
+      <!-- 4. TIEMPO -->
+      <mat-card appearance="outlined" class="seccion">
+        <div class="cab">
+          <span class="num">4</span><h2>Tiempo total de experiencia</h2><span class="spacer"></span>
+          <button mat-icon-button (click)="editar(3)" matTooltip="Editar" aria-label="Editar tiempo de experiencia"><mat-icon>edit</mat-icon></button>
+        </div>
+        @if (h.tiempoExperiencia; as t) {
+          <ul class="tiempo">
+            <li><span>Servidor público</span><b>{{ t.servidorPublico.anios }} a · {{ t.servidorPublico.meses }} m</b></li>
+            <li><span>Sector privado</span><b>{{ t.sectorPrivado.anios }} a · {{ t.sectorPrivado.meses }} m</b></li>
+            <li><span>Independiente</span><b>{{ t.independiente.anios }} a · {{ t.independiente.meses }} m</b></li>
+            <li class="total"><span>Total</span><b>{{ t.total.anios }} años · {{ t.total.meses }} meses</b></li>
+          </ul>
+        } @else {
+          <p class="vacio">Sin calcular.</p>
+        }
+      </mat-card>
+
+      <!-- 5. DECLARACIÓN -->
+      <mat-card appearance="outlined" class="seccion">
+        <div class="cab">
+          <span class="num">5</span><h2>Declaración y firma</h2><span class="spacer"></span>
+          <button mat-icon-button (click)="editar(4)" matTooltip="Editar" aria-label="Editar declaración"><mat-icon>edit</mat-icon></button>
+        </div>
+        @if (h.declaracion; as dec) {
+          <p>Inhabilidad / incompatibilidad: <b>{{ dec.inhabilidad === 'SI' ? 'Sí' : dec.inhabilidad === 'NO' ? 'No' : '—' }}</b></p>
+          <p>Certifica veracidad: <b>{{ dec.certificaVeracidad ? 'Sí' : 'No' }}</b> · Autoriza datos: <b>{{ dec.autorizaTratamientoDatos ? 'Sí' : 'No' }}</b></p>
+          <p>{{ dec.ciudadDiligenciamiento }}, {{ dec.fechaDiligenciamiento | fechaCo }}</p>
+          @if (dec.firmaUrl) { <img class="firma" [src]="dec.firmaUrl" alt="Firma registrada" /> }
+        } @else {
+          <p class="vacio">Sin diligenciar.</p>
+        }
+      </mat-card>
+    </div>
+
+    <div class="zona-riesgo">
+      <button mat-stroked-button type="button" (click)="eliminarHojaVida()"><mat-icon>delete_forever</mat-icon> Eliminar hoja de vida</button>
+    </div>
+  } @else {
+    <mat-card appearance="outlined" class="vacia">
+      <mat-icon>post_add</mat-icon>
+      <h2>Aún no tienes una hoja de vida</h2>
+      <p>Diligencia el Formato Único de Hoja de Vida – Persona Natural en 7 pasos.</p>
+      <a mat-flat-button routerLink="/hoja-vida/editar"><mat-icon>add</mat-icon> Crear hoja de vida</a>
+    </mat-card>
+  }
+}

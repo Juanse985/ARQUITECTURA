@@ -1,0 +1,157 @@
+@let f = form();
+<app-seccion-header numero="1" titulo="Datos personales" descripcion="Los campos marcados con * son obligatorios." [porcentaje]="porcentaje()" />
+
+<app-institucional-fields [form]="institucional()" />
+
+<div class="layout" [formGroup]="f">
+  <div class="campos">
+    <div class="form-grid">
+      <mat-form-field class="col-4">
+        <mat-label>Primer apellido</mat-label>
+        <input matInput formControlName="primerApellido" autocomplete="family-name" required />
+        <mat-error>{{ f.controls.primerApellido.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Segundo apellido (o de casada)</mat-label>
+        <input matInput formControlName="segundoApellido" />
+        <mat-error>{{ f.controls.segundoApellido.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Nombres</mat-label>
+        <input matInput formControlName="nombres" autocomplete="given-name" required />
+        <mat-error>{{ f.controls.nombres.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <h3 class="section-title">Documento de identificación</h3>
+    <div class="form-grid">
+      <div class="col-6">
+        <span class="radio-label" id="lbl-tipodoc">Tipo de documento *</span>
+        <mat-radio-group formControlName="tipoDocumento" class="radio-group-row" aria-labelledby="lbl-tipodoc">
+          @for (t of catalogos.tiposDocumento; track t.valor) {
+            <mat-radio-button [value]="t.valor" [attr.title]="t.descripcion">{{ t.etiqueta }} <small>({{ t.descripcion }})</small></mat-radio-button>
+          }
+        </mat-radio-group>
+        <app-field-error [control]="f.controls.tipoDocumento" />
+      </div>
+      <mat-form-field class="col-6">
+        <mat-label>Número de documento</mat-label>
+        <input matInput formControlName="numeroDocumento" required />
+        <mat-error>{{ f.controls.numeroDocumento.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-grid">
+      <div class="col-4">
+        <span class="radio-label" id="lbl-sexo">Sexo *</span>
+        <mat-radio-group formControlName="sexo" class="radio-group-row" aria-labelledby="lbl-sexo">
+          @for (s of catalogos.sexos; track s.valor) {
+            <mat-radio-button [value]="s.valor">{{ s.etiqueta }} <small>({{ s.descripcion }})</small></mat-radio-button>
+          }
+        </mat-radio-group>
+        <app-field-error [control]="f.controls.sexo" />
+      </div>
+      <div class="col-4">
+        <span class="radio-label" id="lbl-nac">Nacionalidad *</span>
+        <mat-radio-group formControlName="nacionalidad" class="radio-group-row" aria-labelledby="lbl-nac">
+          @for (n of catalogos.nacionalidades; track n.valor) {
+            <mat-radio-button [value]="n.valor">{{ n.etiqueta }}</mat-radio-button>
+          }
+        </mat-radio-group>
+      </div>
+      @if (f.controls.nacionalidad.value === 'EXT') {
+        <mat-form-field class="col-4">
+          <mat-label>País</mat-label>
+          <mat-select formControlName="paisNacionalidad" required>
+            @for (p of catalogos.paises; track p) {
+              @if (p !== catalogos.paisColombia) {
+                <mat-option [value]="p">{{ p }}</mat-option>
+              }
+            }
+          </mat-select>
+          <mat-error>{{ f.controls.paisNacionalidad.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+      }
+    </div>
+
+    @if (f.controls.sexo.value === 'M') {
+      <h3 class="section-title">Libreta militar</h3>
+      <div class="form-grid" formGroupName="libretaMilitar">
+        <div class="col-4">
+          <span class="radio-label" id="lbl-libreta">Clase</span>
+          <mat-radio-group formControlName="clase" class="radio-group-row" aria-labelledby="lbl-libreta">
+            @for (c of catalogos.clasesLibreta; track c.valor) {
+              <mat-radio-button [value]="c.valor">{{ c.etiqueta }}</mat-radio-button>
+            }
+          </mat-radio-group>
+        </div>
+        <mat-form-field class="col-4">
+          <mat-label>Número</mat-label>
+          <input matInput formControlName="numero" appSoloNumeros inputmode="numeric" />
+          <mat-error>{{ f.controls.libretaMilitar.controls.numero.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="col-4">
+          <mat-label>D.M. (distrito militar)</mat-label>
+          <input matInput formControlName="distritoMilitar" />
+        </mat-form-field>
+      </div>
+    }
+  </div>
+
+  <aside class="foto" aria-label="Foto del aspirante">
+    <div class="marco">
+      @if (f.controls.fotoUrl.value) {
+        <img [src]="f.controls.fotoUrl.value" alt="Foto del aspirante" />
+      } @else {
+        <mat-icon aria-hidden="true">account_box</mat-icon>
+        <small>Foto 3x4 (opcional)</small>
+      }
+    </div>
+    <label class="btn-foto">
+      <input type="file" accept="image/png,image/jpeg" (change)="seleccionarFoto($event)" />
+      <mat-icon>photo_camera</mat-icon> {{ f.controls.fotoUrl.value ? 'Cambiar foto' : 'Subir foto' }}
+    </label>
+    @if (f.controls.fotoUrl.value) {
+      <button mat-button type="button" (click)="quitarFoto()"><mat-icon>delete</mat-icon> Quitar</button>
+    }
+  </aside>
+</div>
+
+<div [formGroup]="f">
+  <h3 class="section-title">Fecha y lugar de nacimiento</h3>
+  <div class="form-grid">
+    <mat-form-field class="col-4">
+      <mat-label>Fecha de nacimiento</mat-label>
+      <input matInput [matDatepicker]="pickerNac" formControlName="fechaNacimiento" placeholder="dd/mm/aaaa" [max]="maxFecha" [min]="minFecha" required />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerNac" />
+      <mat-datepicker #pickerNac startView="multi-year" />
+      <mat-hint>dd/mm/aaaa</mat-hint>
+      <mat-error>{{ f.controls.fechaNacimiento.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+  </div>
+  <app-ubicacion-fields [grupo]="f.controls.lugarNacimiento" />
+
+  <h3 class="section-title">Dirección de correspondencia</h3>
+  <div class="form-grid">
+    <mat-form-field class="col-12">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="direccionCorrespondencia" autocomplete="street-address" required />
+      <mat-error>{{ f.controls.direccionCorrespondencia.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+  </div>
+  <app-ubicacion-fields [grupo]="f.controls.ubicacionCorrespondencia" />
+  <div class="form-grid">
+    <mat-form-field class="col-6">
+      <mat-label>Teléfono</mat-label>
+      <input matInput type="tel" formControlName="telefono" autocomplete="tel" required />
+      <mat-icon matSuffix aria-hidden="true">call</mat-icon>
+      <mat-error>{{ f.controls.telefono.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+    <mat-form-field class="col-6">
+      <mat-label>E-mail</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" required />
+      <mat-icon matSuffix aria-hidden="true">mail</mat-icon>
+      <mat-error>{{ f.controls.email.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+  </div>
+</div>

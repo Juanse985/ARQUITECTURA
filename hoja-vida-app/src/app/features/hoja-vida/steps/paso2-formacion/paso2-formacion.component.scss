@@ -1,0 +1,14 @@
+@use 'variables' as v;
+
+.grados { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+fieldset {
+  border: 1px solid v.$gris-300; border-radius: 10px; padding: 4px 10px 8px; margin: 0;
+  legend { font-size: 0.8rem; font-weight: 700; color: v.$azul-800; padding: 0 6px; text-transform: uppercase; }
+}
+.ayuda { color: v.$gris-700; font-size: 0.88rem; margin-top: 0; }
+.item { padding: 12px 16px 4px; margin-bottom: 12px; border-left: 4px solid v.$azul-800; }
+.item-cab { display: flex; align-items: center; margin-bottom: 8px; .spacer { flex: 1; } }
+.idioma { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 20px; padding-top: 4px;
+  .nombre { flex: 1 1 200px; } .habilidad { flex: 0 0 auto; } }
+.vacio { display: flex; align-items: center; gap: 8px; color: v.$gris-500; font-style: italic; }
+.agregar { margin-bottom: 16px; }

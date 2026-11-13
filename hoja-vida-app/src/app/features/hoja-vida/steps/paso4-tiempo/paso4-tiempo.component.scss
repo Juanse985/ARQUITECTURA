@@ -1,0 +1,13 @@
+@use 'variables' as v;
+
+.info { display: flex; gap: 10px; align-items: flex-start; background: v.$azul-100; color: v.$azul-900;
+  padding: 12px 14px; border-radius: 10px; font-size: 0.9rem; mat-icon { color: v.$azul-800; } }
+.tabla-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid v.$gris-300; max-width: 640px; }
+.tabla { width: 100%; }
+th.mat-mdc-header-cell { background: v.$azul-800 !important; color: #fff !important; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; }
+td { font-size: 0.95rem; }
+.valor { font-weight: 700; color: v.$azul-800; font-size: 1.05rem; }
+.mini { width: 90px; margin: 6px 0; }
+tr.total td { background: v.$dorado-100; font-weight: 700; }
+tr.editable td { background: #fffdf5; }
+.alerta { display: flex; gap: 8px; align-items: center; color: v.$rojo; }

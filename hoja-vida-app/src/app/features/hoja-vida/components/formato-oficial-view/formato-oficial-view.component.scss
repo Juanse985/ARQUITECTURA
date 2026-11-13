@@ -1,0 +1,87 @@
+// Vista que imita el Formato Único de Hoja de Vida (Función Pública).
+$borde: #1f2933;
+$azul: #0b2d6b;
+$gris: #e9edf3;
+
+:host { display: block; }
+.formato {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111;
+  font-size: 10.5px;
+  display: flex; flex-direction: column; gap: 24px; align-items: center;
+}
+.pagina {
+  width: 216mm; // carta
+  min-height: 279mm;
+  background: #fff;
+  padding: 12mm 12mm 10mm;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.15);
+  position: relative;
+  @media screen and (max-width: 900px) { width: 100%; min-height: auto; padding: 16px; }
+}
+.encabezado {
+  display: grid; grid-template-columns: 160px 1fr 220px; gap: 10px; align-items: center;
+  border: 1.5px solid $borde; padding: 8px; margin-bottom: 8px;
+  .logo { display: flex; justify-content: center; ::ng-deep img { height: 46px !important; max-width: 155px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  .titulo { text-align: center; }
+  h1 { margin: 0; font-size: 18px; letter-spacing: 1px; color: $azul; span { font-size: 22px; } }
+  p { margin: 4px 0 0; font-weight: 700; small { font-weight: 400; } }
+  .entidad { display: flex; gap: 6px; align-items: stretch; }
+  .caja { flex: 1; border: 1px solid $borde; padding: 4px; display: flex; flex-direction: column; justify-content: space-between;
+    small { font-weight: 700; font-size: 8px; } .entidad-nombre { font-size: 8.5px; line-height: 1.3; text-align: center; padding-top: 4px; } }
+  .foto { width: 75px; height: 95px; border: 1px solid $borde; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: cover; } small { color: #888; } }
+  @media screen and (max-width: 700px) { grid-template-columns: 1fr; }
+}
+.sec {
+  display: flex; align-items: center; gap: 8px; margin: 10px 0 4px;
+  font-size: 12px; font-weight: 700; color: #fff; background: $azul; padding: 4px 6px;
+  span { background: #f2b705; color: $azul; width: 20px; height: 20px; border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 11px; }
+}
+.nota { margin: 6px 0 4px; font-size: 9.5px; line-height: 1.35; text-align: justify; }
+.t {
+  width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: auto;
+  td { border: 1px solid $borde; padding: 2px 4px; vertical-align: top; }
+  .lbl td { background: $gris; font-size: 8.5px; font-weight: 700; text-align: center; vertical-align: middle; }
+  .val td { height: 20px; font-size: 10.5px; }
+  .centro { text-align: center; vertical-align: middle; }
+  .mini-lbl { font-size: 8px; font-weight: 700; background: $gris; width: 1%; white-space: nowrap; vertical-align: middle; }
+  .ancho { width: 40%; }
+  .email { word-break: break-all; }
+  .total td { font-weight: 700; background: #fdf3d1; }
+}
+.mini { font-size: 7.5px; font-weight: 700; color: #444; margin-right: 2px; }
+.casillas { white-space: nowrap; }
+.cas { display: inline-flex; align-items: center; gap: 3px; margin-right: 8px; font-size: 9px; font-weight: 700; }
+.box { display: inline-flex; width: 14px; height: 14px; border: 1px solid $borde; align-items: center; justify-content: center; font-size: 10px; }
+.dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  @media screen and (max-width: 700px) { grid-template-columns: 1fr; } }
+.basica { grid-template-columns: 1.6fr 1fr; }
+.grados .num td { font-size: 9px; }
+.bloque-exp { margin-bottom: 10px; break-inside: avoid; }
+.titulo-exp { font-weight: 700; font-size: 10px; background: #fdf3d1; border: 1px solid $borde; border-bottom: none; padding: 3px 6px; }
+.fecha { display: flex; gap: 10px; border: none !important; span { flex: 1; } }
+td.fecha { display: table-cell; span { margin-right: 10px; } }
+.actual { font-weight: 700; color: $azul; }
+.tiempo { max-width: 60%; @media screen and (max-width: 700px) { max-width: 100%; } }
+.caja-texto { border: 1px solid $borde; padding: 8px 10px; font-size: 9.5px; line-height: 1.5; text-align: justify;
+  p { margin: 0 0 8px; } }
+.firma-fila { display: flex; gap: 30px; margin-top: 30px; flex-wrap: wrap; }
+.campo-firma { flex: 1; min-width: 200px; text-align: center;
+  .linea { border-bottom: 1px solid $borde; min-height: 22px; font-size: 10.5px; }
+  .firma-img { min-height: 60px; display: flex; align-items: flex-end; justify-content: center; img { max-height: 60px; max-width: 220px; } }
+  small { font-size: 8px; font-weight: 700; } }
+.lineas span { display: block; border-bottom: 1px solid #777; min-height: 20px; }
+.pie-pag { position: absolute; bottom: 4mm; left: 0; right: 0; text-align: center; font-size: 8px; color: #777; margin: 0;
+  @media screen and (max-width: 900px) { position: static; margin-top: 12px; } }
+
+@media print {
+  .formato { gap: 0; display: block; }
+  .pagina { box-shadow: none; width: auto; min-height: auto; padding: 0; margin: 0; }
+  .salto { break-before: page; page-break-before: always; }
+  .pie-pag { position: static; margin-top: 8px; }
+  .sec, .lbl td, .total td, .titulo-exp, .sec span { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+.ies { font-size: 8.5px; color: #444; }

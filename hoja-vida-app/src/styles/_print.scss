@@ -1,0 +1,58 @@
+// Estilos de impresión globales: solo se imprime el formato oficial.
+@media print {
+  @page {
+    size: letter;
+    margin: 10mm;
+  }
+  html, body {
+    background: #fff !important;
+  }
+  .no-print,
+  mat-toolbar,
+  mat-sidenav,
+  .app-footer,
+  .breadcrumb,
+  .swal2-container {
+    display: none !important;
+  }
+  mat-sidenav-content,
+  .mat-drawer-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .page-container {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}
+
+// Impresión de la vista previa desde el stepper: solo el formato.
+@media print {
+  body.imprimiendo-vista-previa {
+    .mat-horizontal-stepper-header-container,
+    .mat-vertical-stepper-header,
+    .mat-stepper-vertical-line::before,
+    app-seccion-header,
+    app-page-title { display: none !important; }
+    .contenedor { border: none !important; padding: 0 !important; }
+    .mat-horizontal-content-container, .mat-vertical-content { padding: 0 !important; }
+  }
+}
+
+// El layout usa contenedores con altura fija y scroll interno: en impresión
+// se liberan para que el navegador pueda paginar todo el formato.
+@media print {
+  app-main-layout,
+  .mat-drawer-container,
+  .mat-sidenav-container,
+  .mat-drawer-content,
+  .mat-sidenav-content,
+  main {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+  .mat-mdc-card { box-shadow: none !important; border: none !important; }
+}

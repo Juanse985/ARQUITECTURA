@@ -1,0 +1,345 @@
+@let h = hv();
+@let d = dp();
+<article class="formato" aria-label="Formato Único de Hoja de Vida – Persona Natural">
+  <!-- ======================= PÁGINA 1 ======================= -->
+  <section class="pagina">
+    <header class="encabezado">
+      <div class="logo"><app-logo-placeholder variante="completo" /></div>
+      <div class="titulo">
+        <h1>FORMATO ÚNICO<br /><span>HOJA DE VIDA</span></h1>
+        <p>Persona Natural<br /><small>(Leyes 190 de 1995, 489 y 443 de 1998)</small></p>
+      </div>
+      <div class="entidad">
+        <div class="caja">
+          <small>ENTIDAD RECEPTORA</small>
+          <div class="entidad-nombre">{{ inst.nombre() }}<br /><b>{{ inst.sigla() }}</b></div>
+        </div>
+        <div class="foto">
+          @if (d?.fotoUrl) {
+            <img [src]="d?.fotoUrl" alt="Foto" />
+          } @else {
+            <small>FOTO</small>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. DATOS PERSONALES -->
+    <h2 class="sec"><span>1</span> DATOS PERSONALES</h2>
+    <table class="t">
+      <tr class="lbl">
+        <td>PRIMER APELLIDO</td>
+        <td>SEGUNDO APELLIDO (O DE CASADA)</td>
+        <td>NOMBRES</td>
+      </tr>
+      <tr class="val">
+        <td>{{ d?.primerApellido }}</td>
+        <td>{{ d?.segundoApellido }}</td>
+        <td>{{ d?.nombres }}</td>
+      </tr>
+    </table>
+    <table class="t">
+      <tr class="lbl">
+        <td colspan="2">DOCUMENTO DE IDENTIFICACIÓN</td>
+        <td>SEXO</td>
+        <td colspan="2">NACIONALIDAD</td>
+        <td>PAÍS</td>
+      </tr>
+      <tr class="val">
+        <td class="casillas">
+          @for (t of c.tiposDocumento; track t.valor) {
+            <span class="cas">{{ t.etiqueta }} <b class="box">{{ x(d?.tipoDocumento === t.valor) }}</b></span>
+          }
+        </td>
+        <td><small class="mini">No.</small> {{ d?.numeroDocumento }}</td>
+        <td class="casillas">
+          @for (s of c.sexos; track s.valor) {
+            <span class="cas">{{ s.etiqueta }} <b class="box">{{ x(d?.sexo === s.valor) }}</b></span>
+          }
+        </td>
+        <td class="casillas"><span class="cas">COL. <b class="box">{{ x(d?.nacionalidad === 'COL') }}</b></span></td>
+        <td class="casillas"><span class="cas">EXTRANJERO <b class="box">{{ x(d?.nacionalidad === 'EXT') }}</b></span></td>
+        <td>{{ d?.nacionalidad === 'EXT' ? d?.paisNacionalidad : '' }}</td>
+      </tr>
+    </table>
+    <table class="t">
+      <tr class="lbl">
+        <td colspan="2">LIBRETA MILITAR</td>
+        <td>NÚMERO</td>
+        <td>D.M.</td>
+      </tr>
+      <tr class="val">
+        <td class="casillas"><span class="cas">PRIMERA CLASE <b class="box">{{ x(d?.libretaMilitar?.clase === 'PRIMERA') }}</b></span></td>
+        <td class="casillas"><span class="cas">SEGUNDA CLASE <b class="box">{{ x(d?.libretaMilitar?.clase === 'SEGUNDA') }}</b></span></td>
+        <td>{{ d?.libretaMilitar?.numero }}</td>
+        <td>{{ d?.libretaMilitar?.distritoMilitar }}</td>
+      </tr>
+    </table>
+    <div class="dos-col">
+      <table class="t">
+        <tr class="lbl"><td colspan="4">FECHA Y LUGAR DE NACIMIENTO</td></tr>
+        <tr class="val">
+          <td class="mini-lbl">FECHA</td>
+          <td><small class="mini">DÍA</small> {{ fechaNac().dia }}</td>
+          <td><small class="mini">MES</small> {{ fechaNac().mes }}</td>
+          <td><small class="mini">AÑO</small> {{ fechaNac().anio }}</td>
+        </tr>
+        <tr class="val"><td class="mini-lbl">PAÍS</td><td colspan="3">{{ lugarNac().pais }}</td></tr>
+        <tr class="val"><td class="mini-lbl">DEPTO</td><td colspan="3">{{ lugarNac().departamento }}</td></tr>
+        <tr class="val"><td class="mini-lbl">MUNICIPIO</td><td colspan="3">{{ lugarNac().municipio }}</td></tr>
+      </table>
+      <table class="t">
+        <tr class="lbl"><td colspan="4">DIRECCIÓN DE CORRESPONDENCIA</td></tr>
+        <tr class="val"><td colspan="4">{{ d?.direccionCorrespondencia }}</td></tr>
+        <tr class="val">
+          <td class="mini-lbl">PAÍS</td><td>{{ ubicCorr().pais }}</td>
+          <td class="mini-lbl">DEPTO</td><td>{{ ubicCorr().departamento }}</td>
+        </tr>
+        <tr class="val"><td class="mini-lbl">MUNICIPIO</td><td colspan="3">{{ ubicCorr().municipio }}</td></tr>
+        <tr class="val">
+          <td class="mini-lbl">TELÉFONO</td><td>{{ d?.telefono }}</td>
+          <td class="mini-lbl">EMAIL</td><td class="email">{{ d?.email }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 2. FORMACIÓN ACADÉMICA -->
+    <h2 class="sec"><span>2</span> FORMACIÓN ACADÉMICA</h2>
+    <p class="nota"><b>EDUCACIÓN BÁSICA Y MEDIA</b> — Marque con una X el último grado aprobado (los grados de 1o. a 6o. de bachillerato equivalen a 6o. a 11o. de educación básica secundaria y media).</p>
+    <div class="dos-col basica">
+      <table class="t grados">
+        <tr class="lbl">
+          <td colspan="5">PRIMARIA</td>
+          <td colspan="4">SECUNDARIA</td>
+          <td colspan="2">MEDIA</td>
+        </tr>
+        <tr class="lbl num">
+          @for (g of grados; track g) {
+            <td>{{ g }}o</td>
+          }
+        </tr>
+        <tr class="val">
+          @for (g of grados; track g) {
+            <td class="centro"><b>{{ x(h.educacionBasica?.ultimoGrado === g) }}</b></td>
+          }
+        </tr>
+      </table>
+      <table class="t">
+        <tr class="lbl"><td colspan="2">TÍTULO OBTENIDO:</td></tr>
+        <tr class="val"><td colspan="2">{{ h.educacionBasica?.titulo }}</td></tr>
+        <tr class="lbl"><td colspan="2">FECHA DE GRADO</td></tr>
+        <tr class="val">
+          <td><small class="mini">MES</small> {{ h.educacionBasica?.mesGrado ?? '' }}</td>
+          <td><small class="mini">AÑO</small> {{ h.educacionBasica?.anioGrado ?? '' }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <p class="nota">
+      <b>EDUCACIÓN SUPERIOR (PREGRADO Y POSTGRADO)</b> — Diligencie este punto en estricto orden cronológico, en modalidad académica escriba:
+      @for (m of c.modalidades; track m.valor; let ultimo = $last) {
+        <b>{{ m.etiqueta }}</b> ({{ m.descripcion }}){{ ultimo ? '.' : ', ' }}
+      }
+      Relacione al frente el número de la tarjeta profesional (si este ha sido prevista en una ley).
+    </p>
+    <table class="t sup">
+      <thead>
+        <tr class="lbl">
+          <td rowspan="2">MODALIDAD<br />ACADÉMICA</td>
+          <td rowspan="2">No. SEMESTRES<br />APROBADOS</td>
+          <td colspan="2">GRADUADO</td>
+          <td rowspan="2" class="ancho">NOMBRE DE LOS ESTUDIOS<br />O TÍTULO OBTENIDO</td>
+          <td colspan="2">TERMINACIÓN</td>
+          <td rowspan="2">No. DE TARJETA<br />PROFESIONAL</td>
+        </tr>
+        <tr class="lbl">
+          <td>SI</td><td>NO</td><td>MES</td><td>AÑO</td>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of estudios(); track $index) {
+          <tr class="val">
+            <td class="centro">{{ e?.modalidad }}</td>
+            <td class="centro">{{ e?.semestresAprobados ?? '' }}</td>
+            <td class="centro"><b>{{ x(e?.graduado === true) }}</b></td>
+            <td class="centro"><b>{{ x(!!e && e.graduado === false) }}</b></td>
+            <td>{{ e?.titulo }}@if (e?.institucion) { <small class="ies"> – {{ e?.institucion }}</small> }</td>
+            <td class="centro">{{ e?.mesTerminacion ?? '' }}</td>
+            <td class="centro">{{ e?.anioTerminacion ?? '' }}</td>
+            <td>{{ e?.tarjetaProfesional }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <p class="nota">
+      Especifique los idiomas diferentes al español que: habla, lee, escribe de forma: Regular (<b>R</b>), Bien (<b>B</b>) o Muy bien (<b>MB</b>).
+    </p>
+    <table class="t idiomas">
+      <thead>
+        <tr class="lbl">
+          <td rowspan="2" class="ancho">IDIOMA</td>
+          <td colspan="3">LO HABLA</td>
+          <td colspan="3">LO LEE</td>
+          <td colspan="3">LO ESCRIBE</td>
+        </tr>
+        <tr class="lbl">
+          @for (k of [1, 2, 3]; track k) {
+            @for (n of niveles; track n) {
+              <td>{{ n }}</td>
+            }
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of idiomas(); track $index) {
+          <tr class="val">
+            <td>{{ i?.idioma }}</td>
+            @for (n of niveles; track n) {
+              <td class="centro"><b>{{ x(i?.habla === n) }}</b></td>
+            }
+            @for (n of niveles; track n) {
+              <td class="centro"><b>{{ x(i?.lee === n) }}</b></td>
+            }
+            @for (n of niveles; track n) {
+              <td class="centro"><b>{{ x(i?.escribe === n) }}</b></td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+    <p class="pie-pag">Formato Único Hoja de Vida – Persona Natural · Página 1</p>
+  </section>
+
+  <!-- ======================= PÁGINA 2 ======================= -->
+  <section class="pagina salto">
+    <h2 class="sec"><span>3</span> EXPERIENCIA LABORAL</h2>
+    <p class="nota">
+      Relacione su experiencia laboral o de prestación de servicios en estricto orden cronológico comenzando por el actual.
+    </p>
+    @for (e of experiencias(); track $index; let primero = $first) {
+      <div class="bloque-exp">
+        <div class="titulo-exp">{{ primero ? 'EMPLEO ACTUAL O CONTRATO VIGENTE' : 'EMPLEO O CONTRATO ANTERIOR' }}</div>
+        <table class="t">
+          <tr class="lbl">
+            <td colspan="3">EMPRESA O ENTIDAD</td>
+            <td>PÚBLICA</td>
+            <td>PRIVADA</td>
+            <td>PAÍS</td>
+          </tr>
+          <tr class="val">
+            <td colspan="3">{{ e?.empresa }}</td>
+            <td class="centro"><b>{{ x(e?.tipoEntidad === 'PUBLICA') }}</b></td>
+            <td class="centro"><b>{{ x(e?.tipoEntidad === 'PRIVADA') }}</b></td>
+            <td>{{ ubic(e).pais }}</td>
+          </tr>
+          <tr class="lbl">
+            <td colspan="2">DEPARTAMENTO</td>
+            <td colspan="2">MUNICIPIO</td>
+            <td colspan="2">CORREO ELECTRÓNICO ENTIDAD</td>
+          </tr>
+          <tr class="val">
+            <td colspan="2">{{ ubic(e).departamento }}</td>
+            <td colspan="2">{{ ubic(e).municipio }}</td>
+            <td colspan="2" class="email">{{ e?.correoEntidad }}</td>
+          </tr>
+          <tr class="lbl">
+            <td colspan="2">TELÉFONOS</td>
+            <td colspan="2">FECHA DE INGRESO</td>
+            <td colspan="2">FECHA DE RETIRO</td>
+          </tr>
+          <tr class="val">
+            <td colspan="2">{{ e?.telefonos }}</td>
+            <td colspan="2" class="fecha">
+              <span><small class="mini">DÍA</small> {{ partes(e?.fechaIngreso).dia }}</span>
+              <span><small class="mini">MES</small> {{ partes(e?.fechaIngreso).mes }}</span>
+              <span><small class="mini">AÑO</small> {{ partes(e?.fechaIngreso).anio }}</span>
+            </td>
+            <td colspan="2" class="fecha">
+              @if (e?.empleoActual) {
+                <span class="actual">ACTUAL</span>
+              } @else {
+                <span><small class="mini">DÍA</small> {{ partes(e?.fechaRetiro).dia }}</span>
+                <span><small class="mini">MES</small> {{ partes(e?.fechaRetiro).mes }}</span>
+                <span><small class="mini">AÑO</small> {{ partes(e?.fechaRetiro).anio }}</span>
+              }
+            </td>
+          </tr>
+          <tr class="lbl">
+            <td colspan="2">CARGO O CONTRATO {{ primero ? 'ACTUAL' : '' }}</td>
+            <td colspan="2">DEPENDENCIA</td>
+            <td colspan="2">DIRECCIÓN</td>
+          </tr>
+          <tr class="val">
+            <td colspan="2">{{ e?.cargo }}</td>
+            <td colspan="2">{{ e?.dependencia }}</td>
+            <td colspan="2">{{ e?.direccion }}</td>
+          </tr>
+        </table>
+      </div>
+    }
+    <p class="pie-pag">Formato Único Hoja de Vida – Persona Natural · Página 2</p>
+  </section>
+
+  <!-- ======================= PÁGINA 3 ======================= -->
+  <section class="pagina salto">
+    <h2 class="sec"><span>4</span> TIEMPO TOTAL DE EXPERIENCIA</h2>
+    <p class="nota">Indique el tiempo total de su experiencia laboral en número de años y meses.</p>
+    <table class="t tiempo">
+      <tr class="lbl">
+        <td class="ancho">OCUPACIÓN</td>
+        <td>AÑOS</td>
+        <td>MESES</td>
+      </tr>
+      @for (f of filasTiempo(); track f.ocupacion) {
+        <tr class="val" [class.total]="f.total">
+          <td>{{ f.ocupacion }}</td>
+          <td class="centro">{{ f.d?.anios ?? '' }}</td>
+          <td class="centro">{{ f.d?.meses ?? '' }}</td>
+        </tr>
+      }
+    </table>
+
+    <h2 class="sec"><span>5</span> FIRMA DEL SERVIDOR PÚBLICO O CONTRATISTA</h2>
+    <div class="caja-texto">
+      <p>
+        MANIFIESTO BAJO LA GRAVEDAD DEL JURAMENTO QUE
+        <span class="cas">SÍ <b class="box">{{ x(h.declaracion?.inhabilidad === 'SI') }}</b></span>
+        <span class="cas">NO <b class="box">{{ x(h.declaracion?.inhabilidad === 'NO') }}</b></span>
+        {{ c.textos.inhabilidad.toUpperCase() }}
+      </p>
+      <p>{{ c.textos.certificacion.toUpperCase() }}</p>
+      <div class="firma-fila">
+        <div class="campo-firma">
+          <div class="linea">{{ h.declaracion?.ciudadDiligenciamiento }}{{ h.declaracion?.fechaDiligenciamiento ? ', ' + fechaDil().dia + '/' + fechaDil().mes + '/' + fechaDil().anio : '' }}</div>
+          <small>CIUDAD Y FECHA DE DILIGENCIAMIENTO</small>
+        </div>
+        <div class="campo-firma">
+          <div class="linea firma-img">
+            @if (h.declaracion?.firmaUrl) {
+              <img [src]="h.declaracion?.firmaUrl" alt="Firma" />
+            }
+          </div>
+          <small>FIRMA DEL SERVIDOR PÚBLICO O CONTRATISTA</small>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="sec"><span>6</span> OBSERVACIONES DEL JEFE DE RECURSOS HUMANOS Y/O CONTRATOS</h2>
+    <div class="caja-texto">
+      <p>{{ c.textos.certificacionRrhh.toUpperCase() }}</p>
+      <div class="lineas"><span>{{ h.observacionesRrhh?.observaciones }}</span><span></span><span></span></div>
+      <div class="firma-fila">
+        <div class="campo-firma">
+          <div class="linea">{{ h.observacionesRrhh?.firmaJefe }}</div>
+          <small>FIRMA DEL JEFE DE PERSONAL O DE CONTRATOS</small>
+        </div>
+        <div class="campo-firma">
+          <div class="linea">{{ h.observacionesRrhh?.ciudad }} {{ h.observacionesRrhh?.fecha }}</div>
+          <small>CIUDAD Y FECHA</small>
+        </div>
+      </div>
+    </div>
+    <p class="pie-pag">Formato Único Hoja de Vida – Persona Natural · Página 3</p>
+  </section>
+</article>

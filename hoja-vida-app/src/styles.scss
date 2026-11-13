@@ -1,0 +1,114 @@
+@use 'theme';
+@use 'sweetalert';
+@use 'print';
+@use 'variables' as v;
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: v.$fuente-base;
+  background: v.$azul-50;
+  color: v.$gris-900;
+}
+
+a { color: v.$azul-700; }
+
+// Contenedor estándar de páginas
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  @media (max-width: v.$bp-movil) { padding: 12px; }
+}
+
+// Rejillas de formularios responsive
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 4px 16px;
+  align-items: start;
+  > * { grid-column: span 12; }
+  .col-3 { grid-column: span 3; }
+  .col-4 { grid-column: span 4; }
+  .col-6 { grid-column: span 6; }
+  .col-8 { grid-column: span 8; }
+  .col-12 { grid-column: span 12; }
+  @media (max-width: v.$bp-tablet) {
+    .col-3, .col-4 { grid-column: span 6; }
+    .col-8 { grid-column: span 12; }
+  }
+  @media (max-width: v.$bp-movil) {
+    .col-3, .col-4, .col-6, .col-8 { grid-column: span 12; }
+  }
+}
+
+.section-title {
+  color: v.$azul-800;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 16px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid v.$dorado-500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-label {
+  display: block;
+  font-size: 0.85rem;
+  color: v.$gris-700;
+  margin: 8px 0 4px;
+  font-weight: 600;
+}
+.radio-group-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+.field-error-text {
+  color: v.$rojo;
+  font-size: 0.75rem;
+  margin: -4px 0 8px;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  .spacer { flex: 1; }
+}
+
+.chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: v.$azul-100;
+  color: v.$azul-800;
+  &.chip-accent { background: v.$dorado-100; color: #7a5a00; }
+}
+
+.full-width { width: 100%; }
+
+// Accesibilidad: foco visible
+:focus-visible {
+  outline: 3px solid v.$dorado-500;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+}
+
+app-ubicacion-fields { display: block; margin-top: 12px; }
+
+// Botones de la barra superior en blanco sobre el azul institucional
+.toolbar .mat-mdc-icon-button { color: #fff; }

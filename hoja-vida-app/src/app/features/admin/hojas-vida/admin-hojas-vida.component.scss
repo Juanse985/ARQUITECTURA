@@ -1,0 +1,10 @@
+@use 'variables' as v;
+.card { padding: 12px 16px; }
+.barra { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; .buscar { flex: 1; min-width: 260px; } }
+.tabla-wrap { overflow-x: auto; border: 1px solid v.$gris-300; border-radius: 10px; }
+table { width: 100%; min-width: 960px; }
+th.mat-mdc-header-cell { background: v.$azul-50 !important; color: v.$azul-800 !important; font-weight: 700; }
+td small { color: v.$gris-500; }
+.num { text-align: right; }
+.ia { color: v.$dorado-600; vertical-align: middle; font-size: 18px; width: 18px; height: 18px; }
+.vacio { padding: 24px; text-align: center; color: v.$gris-500; }

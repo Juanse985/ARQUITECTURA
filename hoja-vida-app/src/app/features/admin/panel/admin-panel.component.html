@@ -1,0 +1,106 @@
+<app-page-title titulo="Panel de administración" [subtitulo]="'Hojas de vida de ' + inst.sigla() + ' · ' + filtroTexto()" icono="insights">
+  <a mat-flat-button routerLink="/admin/hojas-vida"><mat-icon>folder_shared</mat-icon> Ver hojas de vida</a>
+</app-page-title>
+
+<app-filtros-admin />
+
+@if (est(); as e) {
+  <!-- Indicadores -->
+  <section class="kpis" aria-label="Indicadores principales">
+    <div class="kpi">
+      <span class="lbl">Hojas de vida cargadas</span>
+      <span class="num">{{ e.totalHv | number }}</span>
+      <span class="det">{{ e.completas }} completas · {{ e.borradores }} en borrador</span>
+    </div>
+    <div class="kpi">
+      <span class="lbl">Usuarios registrados</span>
+      <span class="num">{{ e.totalUsuarios | number }}</span>
+      <span class="det">{{ pctCompletas() }}% de las HV están completas</span>
+    </div>
+    <div class="kpi">
+      <span class="lbl">Importadas con IA</span>
+      <span class="num">{{ e.importadasIa | number }}</span>
+      <span class="det">{{ e.conArchivoOriginal }} con archivo original adjunto</span>
+    </div>
+    <div class="kpi destacado">
+      <span class="lbl">Docentes con HV enfocada en su carrera</span>
+      <span class="num">{{ e.docentesAlineados }} <small>/ {{ e.docentes }}</small></span>
+      <span class="det">{{ pctAlineados() }}% de los docentes</span>
+    </div>
+    <div class="kpi">
+      <span class="lbl">Experiencia promedio</span>
+      <span class="num">{{ e.experienciaPromedioAnios }} <small>años</small></span>
+      <span class="det">según la sección 4 del formato</span>
+    </div>
+  </section>
+
+  <!-- Mapa + sedes -->
+  <section class="fila-mapa">
+    <mat-card appearance="outlined" class="card">
+      <h2>Sedes de {{ inst.sigla() }} en Colombia</h2>
+      <p class="ayuda">Haz clic en un departamento o en una sede para filtrar todo el panel.</p>
+      <app-mapa-colombia
+        [sedes]="e.porSede"
+        [porDepartamento]="e.porDepartamento"
+        [departamento]="filtros.filtro().departamento ?? null"
+        [sedeId]="filtros.filtro().sedeId ?? null"
+        (departamentoClic)="filtros.actualizar({ departamento: $event, sedeId: null })"
+        (sedeClic)="filtros.actualizar({ sedeId: $event })"
+      />
+    </mat-card>
+
+    <mat-card appearance="outlined" class="card">
+      <h2>Hojas de vida por sede</h2>
+      <div class="tabla-wrap">
+        <table mat-table [dataSource]="sedesOrdenadas()" aria-label="Hojas de vida por sede">
+          <ng-container matColumnDef="sede"><th mat-header-cell *matHeaderCellDef>Sede</th>
+            <td mat-cell *matCellDef="let s"><button type="button" class="link" (click)="filtros.actualizar({ sedeId: s.sedeId })">{{ s.nombre }}</button></td></ng-container>
+          <ng-container matColumnDef="region"><th mat-header-cell *matHeaderCellDef>Región</th><td mat-cell *matCellDef="let s">{{ inst.nombreRegion(s.region) }}</td></ng-container>
+          <ng-container matColumnDef="total"><th mat-header-cell *matHeaderCellDef class="num">HV</th><td mat-cell *matCellDef="let s" class="num">{{ s.totalHv }}</td></ng-container>
+          <ng-container matColumnDef="docentes"><th mat-header-cell *matHeaderCellDef class="num">Docentes</th><td mat-cell *matCellDef="let s" class="num">{{ s.docentes }}</td></ng-container>
+          <ng-container matColumnDef="alineados"><th mat-header-cell *matHeaderCellDef class="num">Enfocados</th><td mat-cell *matCellDef="let s" class="num">{{ s.docentesAlineados }}</td></ng-container>
+          <ng-container matColumnDef="estudiantes"><th mat-header-cell *matHeaderCellDef class="num">Estudiantes</th><td mat-cell *matCellDef="let s" class="num">{{ s.estudiantes }}</td></ng-container>
+          <tr mat-header-row *matHeaderRowDef="columnasSede; sticky: true"></tr>
+          <tr mat-row *matRowDef="let r; columns: columnasSede" [class.sel]="r.sedeId === filtros.filtro().sedeId"></tr>
+        </table>
+      </div>
+    </mat-card>
+  </section>
+
+  <!-- Docentes alineados por programa -->
+  <mat-card appearance="outlined" class="card">
+    <h2>Docentes con hoja de vida enfocada en la carrera donde enseñan</h2>
+    <p class="ayuda">Un docente está "enfocado" si tiene un título en la misma área de conocimiento (SNIES) del programa donde enseña.</p>
+    <div class="leyenda" aria-hidden="true">
+      <span><i class="alin"></i> Enfocados</span>
+      <span><i class="noalin"></i> Otra área</span>
+    </div>
+    <div class="apiladas" role="list">
+      @for (p of e.alineacionPorPrograma; track p.programaId) {
+        <div class="fila" role="listitem" [attr.aria-label]="p.programa + ': ' + p.alineados + ' de ' + p.docentes + ' docentes enfocados'" [title]="p.programa + ': ' + p.alineados + ' de ' + p.docentes">
+          <span class="etq">{{ p.programa }}</span>
+          <span class="pista">
+            <span class="seg alin" [style.width.%]="ancho(p.alineados, p.docentes)"></span>
+            <span class="seg noalin" [style.width.%]="ancho(p.docentes - p.alineados, p.docentes)"></span>
+          </span>
+          <span class="val">{{ p.alineados }}/{{ p.docentes }}</span>
+        </div>
+      } @empty {
+        <p class="vacio">No hay docentes con los filtros seleccionados.</p>
+      }
+    </div>
+  </mat-card>
+
+  <!-- Perfil de los profesionales -->
+  <section class="graficos">
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Tipo de vinculación" [datos]="e.porTipoVinculacion" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Nivel máximo de formación" subtitulo="títulos con grado obtenido" [datos]="e.porNivelFormacion" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Profesionales por área de conocimiento" subtitulo="SNIES" [datos]="e.porAreaConocimiento" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Profesiones más frecuentes" [datos]="e.topProfesiones" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Años de experiencia" [datos]="e.rangosExperiencia" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Idiomas" subtitulo="personas que declaran el idioma" [datos]="e.idiomas" [mostrarPct]="false" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Formato de la hoja de vida cargada" [datos]="$any(e.porFormatoArchivo)" /></mat-card>
+    <mat-card appearance="outlined" class="card"><app-bar-chart titulo="Hojas de vida por región" [datos]="e.porRegion" /></mat-card>
+    <mat-card appearance="outlined" class="card ancho"><app-bar-chart titulo="Registros por mes" subtitulo="últimos 12 meses" [datos]="e.registrosPorMes" [mostrarPct]="false" /></mat-card>
+  </section>
+}

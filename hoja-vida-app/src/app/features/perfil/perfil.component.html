@@ -1,0 +1,80 @@
+<app-page-title titulo="Mi cuenta" subtitulo="Administra los datos de acceso a la plataforma." icono="manage_accounts" />
+
+<div class="grid">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Datos de la cuenta</mat-card-title>
+      <mat-card-subtitle>Registrado desde {{ auth.usuario()?.fechaRegistro | fechaCo }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="datos" (ngSubmit)="guardarDatos()" novalidate>
+        <mat-form-field>
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="nombres" required />
+          <mat-error>{{ datos.controls.nombres.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="apellidos" required />
+          <mat-error>{{ datos.controls.apellidos.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="email" required />
+          <mat-error>{{ datos.controls.email.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <div class="acciones">
+          <button mat-button type="button" (click)="descartar()" [disabled]="!datos.dirty">Descartar</button>
+          <button mat-flat-button type="submit" [disabled]="!datos.dirty"><mat-icon>save</mat-icon> Actualizar</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Cambiar contraseña</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="password" (ngSubmit)="cambiarPassword()" novalidate>
+        <mat-form-field>
+          <mat-label>Contraseña actual</mat-label>
+          <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="passwordActual" autocomplete="current-password" required />
+          <button mat-icon-button matSuffix type="button" (click)="verPassword.set(!verPassword())"
+            [attr.aria-label]="verPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'">
+            <mat-icon>{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ password.controls.passwordActual.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Nueva contraseña</mat-label>
+          <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="passwordNueva" autocomplete="new-password" required />
+          <mat-hint>Mínimo 8 caracteres, una mayúscula y un número.</mat-hint>
+          <mat-error>{{ password.controls.passwordNueva.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Confirmar nueva contraseña</mat-label>
+          <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="confirmarPassword" autocomplete="new-password" required />
+          <mat-error>{{ password.controls.confirmarPassword.errors | errorMsg }}</mat-error>
+        </mat-form-field>
+        <div class="acciones">
+          <button mat-flat-button class="btn-accent" type="submit"><mat-icon>lock_reset</mat-icon> Cambiar contraseña</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (!auth.esAdmin()) {
+  <mat-card appearance="outlined" class="peligro">
+    <mat-card-header>
+      <mat-card-title>Zona de riesgo</mat-card-title>
+      <mat-card-subtitle>Elimina por completo tu hoja de vida. Tu cuenta se conserva.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions>
+      <button mat-stroked-button color="warn" type="button" (click)="eliminarHojaVida()">
+        <mat-icon>delete_forever</mat-icon> Eliminar mi hoja de vida
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  }
+</div>

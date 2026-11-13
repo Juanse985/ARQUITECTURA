@@ -1,0 +1,121 @@
+@let items = form().controls.items;
+<app-seccion-header
+  numero="3"
+  titulo="Experiencia laboral"
+  descripcion="Relacione su experiencia laboral o de prestación de servicios en estricto orden cronológico, comenzando por el actual."
+  [porcentaje]="porcentaje()"
+/>
+
+<div class="toolbar-exp">
+  <span class="ayuda">El formato impreso trae {{ filas.experiencia }} bloques; aquí puede agregar los que necesite.</span>
+  <span class="spacer"></span>
+  @if (items.length > 1) {
+    <button mat-button type="button" (click)="ordenar()"><mat-icon>sort</mat-icon> Ordenar cronológicamente</button>
+  }
+</div>
+
+@if (items.errors?.['cruceFechas']) {
+  <div class="alerta" role="alert">
+    <mat-icon>warning</mat-icon>
+    Las fechas de las experiencias {{ textoCruces() }} se cruzan. Verifique los períodos laborados.
+  </div>
+}
+@if (items.errors?.['variosEmpleosActuales']) {
+  <div class="alerta" role="alert"><mat-icon>warning</mat-icon> Solo un empleo puede marcarse como "Empleo actual".</div>
+}
+
+@for (exp of items.controls; track exp; let i = $index; let primero = $first; let ultimo = $last) {
+  <mat-card appearance="outlined" class="item" [class.actual]="primero" [formGroup]="exp">
+    <div class="item-cab">
+      <span class="chip" [class.chip-accent]="primero">
+        {{ primero ? 'Empleo actual o contrato vigente' : 'Empleo o contrato anterior' }}
+      </span>
+      <small class="num">#{{ i + 1 }}</small>
+      <span class="spacer"></span>
+      <button mat-icon-button type="button" (click)="mover(i, -1)" [disabled]="primero" matTooltip="Subir" [attr.aria-label]="'Subir experiencia ' + (i + 1)">
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="mover(i, 1)" [disabled]="ultimo" matTooltip="Bajar" [attr.aria-label]="'Bajar experiencia ' + (i + 1)">
+        <mat-icon>arrow_downward</mat-icon>
+      </button>
+      <button mat-icon-button type="button" (click)="eliminar(i)" matTooltip="Eliminar" [attr.aria-label]="'Eliminar experiencia ' + (i + 1)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field class="col-8">
+        <mat-label>Empresa o entidad</mat-label>
+        <input matInput formControlName="empresa" required />
+        <mat-error>{{ exp.controls.empresa.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <div class="col-4">
+        <span class="radio-label" [id]="'lbl-tipo-' + i">Tipo de entidad *</span>
+        <mat-radio-group formControlName="tipoEntidad" class="radio-group-row" [attr.aria-labelledby]="'lbl-tipo-' + i">
+          @for (t of catalogos.tiposEntidad; track t.valor) {
+            <mat-radio-button [value]="t.valor">{{ t.etiqueta }}</mat-radio-button>
+          }
+        </mat-radio-group>
+        <app-field-error [control]="exp.controls.tipoEntidad" />
+      </div>
+    </div>
+
+    <app-ubicacion-fields [grupo]="$any(exp)" />
+
+    <div class="form-grid">
+      <mat-form-field class="col-6">
+        <mat-label>Correo electrónico de la entidad</mat-label>
+        <input matInput type="email" formControlName="correoEntidad" />
+        <mat-error>{{ exp.controls.correoEntidad.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-6">
+        <mat-label>Teléfonos</mat-label>
+        <input matInput type="tel" formControlName="telefonos" />
+      </mat-form-field>
+
+      <mat-form-field class="col-4">
+        <mat-label>Fecha de ingreso</mat-label>
+        <input matInput [matDatepicker]="pIng" formControlName="fechaIngreso" placeholder="dd/mm/aaaa" [max]="maxFecha" required />
+        <mat-datepicker-toggle matIconSuffix [for]="pIng" />
+        <mat-datepicker #pIng startView="multi-year" />
+        <mat-hint>dd/mm/aaaa</mat-hint>
+        <mat-error>{{ exp.controls.fechaIngreso.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Fecha de retiro</mat-label>
+        <input matInput [matDatepicker]="pRet" formControlName="fechaRetiro" placeholder="dd/mm/aaaa"
+          [min]="exp.controls.fechaIngreso.value" [max]="maxFecha" [required]="!exp.controls.empleoActual.value" />
+        <mat-datepicker-toggle matIconSuffix [for]="pRet" />
+        <mat-datepicker #pRet startView="multi-year" />
+        <mat-hint>{{ exp.controls.empleoActual.value ? 'No aplica: empleo actual' : 'dd/mm/aaaa' }}</mat-hint>
+        <mat-error>{{ exp.controls.fechaRetiro.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <div class="col-4 check">
+        <mat-checkbox formControlName="empleoActual">Empleo actual</mat-checkbox>
+      </div>
+      @if (exp.errors?.['rangoFechas']) {
+        <p class="field-error-text col-12" role="alert">La fecha de retiro no puede ser anterior a la fecha de ingreso.</p>
+      }
+
+      <mat-form-field class="col-4">
+        <mat-label>{{ primero ? 'Cargo o contrato actual' : 'Cargo o contrato' }}</mat-label>
+        <input matInput formControlName="cargo" required />
+        <mat-error>{{ exp.controls.cargo.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Dependencia</mat-label>
+        <input matInput formControlName="dependencia" />
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion" />
+      </mat-form-field>
+    </div>
+  </mat-card>
+} @empty {
+  <p class="vacio"><mat-icon>work_off</mat-icon> No has registrado experiencia laboral. Si no tienes experiencia puedes continuar.</p>
+}
+
+<button mat-stroked-button type="button" (click)="agregar()">
+  <mat-icon>add</mat-icon> Agregar experiencia
+</button>

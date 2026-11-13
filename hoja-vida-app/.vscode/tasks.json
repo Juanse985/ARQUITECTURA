@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "SIGEHV: instalar y ejecutar",
+      "type": "shell",
+      "command": "npm install && npx ng serve --port 4300 --open",
+      "options": {
+        "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] },
+        "env": { "NG_CLI_ANALYTICS": "false" }
+      },
+      "runOptions": { "runOn": "folderOpen" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

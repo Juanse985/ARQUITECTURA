@@ -1,0 +1,21 @@
+@use 'variables' as v;
+
+.layout { display: grid; grid-template-columns: 1fr 180px; gap: 24px; align-items: start; }
+@media (max-width: v.$bp-tablet) {
+  .layout { grid-template-columns: 1fr; }
+  .foto { order: -1; }
+}
+.foto { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.marco {
+  width: 150px; height: 190px; border: 2px dashed v.$gris-300; border-radius: 10px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; color: v.$gris-500;
+  mat-icon { font-size: 64px; width: 64px; height: 64px; }
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+.btn-foto {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 14px;
+  border-radius: 20px; background: v.$dorado-500; color: v.$azul-900; font-weight: 600; font-size: 0.85rem;
+  input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  &:focus-within { outline: 3px solid v.$azul-700; }
+}
+small { color: v.$gris-500; }

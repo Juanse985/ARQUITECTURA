@@ -1,0 +1,53 @@
+<app-page-title titulo="Hojas de vida cargadas" [subtitulo]="total() + ' registros con los filtros actuales'" icono="folder_shared">
+  <button mat-flat-button class="btn-accent" type="button" (click)="exportar()" [disabled]="!total()"><mat-icon>download</mat-icon> Exportar CSV</button>
+</app-page-title>
+
+<app-filtros-admin />
+
+<mat-card appearance="outlined" class="card">
+  <div class="barra">
+    <mat-form-field subscriptSizing="dynamic" class="buscar">
+      <mat-label>Buscar por nombre, documento, correo o profesión</mat-label>
+      <input matInput [(ngModel)]="texto" (ngModelChange)="buscar()" maxlength="80" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Estado</mat-label>
+      <mat-select [value]="estado()" (selectionChange)="estado.set($event.value); pagina.set(1)">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option value="COMPLETA">Completa</mat-option>
+        <mat-option value="BORRADOR">Borrador</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="tabla-wrap">
+    <table mat-table [dataSource]="filas()" aria-label="Hojas de vida">
+      <ng-container matColumnDef="nombre"><th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let r"><b>{{ r.nombreCompleto }}</b><br /><small>{{ r.documento }} · {{ r.email }}</small></td></ng-container>
+      <ng-container matColumnDef="vinculacion"><th mat-header-cell *matHeaderCellDef>Vinculación</th><td mat-cell *matCellDef="let r">{{ vinculacion(r.tipoVinculacion) }}</td></ng-container>
+      <ng-container matColumnDef="sede"><th mat-header-cell *matHeaderCellDef>Sede / programa</th>
+        <td mat-cell *matCellDef="let r">{{ inst.nombreSede(r.sedeId) || '—' }}<br /><small>{{ inst.nombrePrograma(r.programaId) }}</small></td></ng-container>
+      <ng-container matColumnDef="profesion"><th mat-header-cell *matHeaderCellDef>Profesión</th>
+        <td mat-cell *matCellDef="let r">{{ r.profesion || '—' }}
+          @if (r.alineado === true) { <br /><span class="chip">Enfocado en su carrera</span> }
+          @if (r.alineado === false) { <br /><span class="chip chip-accent">Otra área</span> }
+        </td></ng-container>
+      <ng-container matColumnDef="nivel"><th mat-header-cell *matHeaderCellDef>Nivel</th><td mat-cell *matCellDef="let r">{{ r.nivelMaximo }}</td></ng-container>
+      <ng-container matColumnDef="experiencia"><th mat-header-cell *matHeaderCellDef class="num">Exp. (años)</th><td mat-cell *matCellDef="let r" class="num">{{ r.experienciaAnios }}</td></ng-container>
+      <ng-container matColumnDef="estado"><th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let r"><span class="chip" [class.chip-accent]="r.estado === 'BORRADOR'">{{ r.estado === 'COMPLETA' ? 'Completa' : 'Borrador' }}</span><br /><small>{{ r.fechaActualizacion | fechaCo }}</small></td></ng-container>
+      <ng-container matColumnDef="origen"><th mat-header-cell *matHeaderCellDef>Origen</th>
+        <td mat-cell *matCellDef="let r">
+          @if (r.origen === 'IMPORTADA_IA') { <mat-icon class="ia" matTooltip="Importada con IA">auto_awesome</mat-icon> }
+          {{ r.formatoArchivo ?? 'Formulario' }}
+        </td></ng-container>
+      <ng-container matColumnDef="acciones"><th mat-header-cell *matHeaderCellDef><span class="sr-only">Acciones</span></th>
+        <td mat-cell *matCellDef="let r"><a mat-icon-button [routerLink]="['/admin/hojas-vida', r.id]" matTooltip="Ver hoja de vida" [attr.aria-label]="'Ver hoja de vida de ' + r.nombreCompleto"><mat-icon>visibility</mat-icon></a></td></ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let r; columns: columnas"></tr>
+      <tr class="mat-row" *matNoDataRow><td class="mat-cell vacio" [attr.colspan]="columnas.length">No hay hojas de vida con esos criterios.</td></tr>
+    </table>
+  </div>
+  <mat-paginator [length]="total()" [pageSize]="tamano()" [pageIndex]="pagina() - 1" [pageSizeOptions]="[10, 25, 50, 100]" (page)="cambiarPagina($event)" aria-label="Paginación" />
+</mat-card>

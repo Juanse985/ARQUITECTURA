@@ -1,0 +1,32 @@
+@use 'variables' as v;
+
+// SweetAlert2 personalizado con los colores institucionales
+.swal2-popup.sigehv-swal {
+  border-radius: v.$radio-tarjeta;
+  font-family: v.$fuente-base;
+  border-top: 6px solid v.$azul-800;
+}
+.swal2-popup.sigehv-swal .swal2-title {
+  color: v.$azul-800;
+  font-size: 1.4rem;
+}
+.swal2-popup.sigehv-swal .swal2-html-container {
+  color: v.$gris-700;
+}
+.swal2-styled.swal2-confirm.sigehv-btn-confirm {
+  background-color: v.$azul-800 !important;
+  border-radius: 24px !important;
+  padding: 0.6em 1.6em !important;
+}
+.swal2-styled.swal2-confirm.sigehv-btn-danger {
+  background-color: v.$rojo !important;
+  border-radius: 24px !important;
+}
+.swal2-styled.swal2-cancel.sigehv-btn-cancel {
+  background-color: v.$dorado-500 !important;
+  color: v.$azul-900 !important;
+  border-radius: 24px !important;
+}
+.swal2-styled:focus-visible {
+  box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.6) !important;
+}

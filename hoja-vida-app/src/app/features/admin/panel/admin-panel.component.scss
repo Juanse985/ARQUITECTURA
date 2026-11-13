@@ -1,0 +1,31 @@
+@use 'variables' as v;
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { background: #fff; border: 1px solid v.$gris-300; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
+  .lbl { font-size: 0.8rem; color: v.$gris-700; font-weight: 600; }
+  .num { font-size: 2rem; font-weight: 700; color: v.$azul-800; line-height: 1.1; small { font-size: 0.95rem; color: v.$gris-500; font-weight: 600; } }
+  .det { font-size: 0.78rem; color: v.$gris-500; }
+  &.destacado { border-left: 5px solid v.$dorado-500; } }
+.card { padding: 16px 18px; margin-bottom: 16px; }
+h2 { margin: 0 0 4px; font-size: 1.02rem; color: v.$azul-800; }
+.ayuda { margin: 0 0 10px; font-size: 0.82rem; color: v.$gris-700; }
+.fila-mapa { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; > * { min-width: 0; }
+  @media (max-width: 1100px) { grid-template-columns: 1fr; } }
+.tabla-wrap { max-height: 640px; overflow: auto; border: 1px solid v.$gris-300; border-radius: 10px; }
+table { width: 100%; }
+th.mat-mdc-header-cell { background: v.$azul-50 !important; color: v.$azul-800 !important; font-weight: 700; }
+.num { text-align: right; }
+tr.sel td { background: v.$dorado-100; }
+.link { all: unset; cursor: pointer; color: v.$azul-700; &:hover, &:focus-visible { text-decoration: underline; } }
+.graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 16px; > * { min-width: 0; }
+  .card { margin-bottom: 0; } .ancho { grid-column: 1 / -1; } }
+.leyenda { display: flex; gap: 16px; font-size: 0.78rem; color: v.$gris-700; margin-bottom: 8px;
+  span { display: flex; align-items: center; gap: 6px; } i { width: 12px; height: 12px; border-radius: 3px; } }
+.alin { background: #3a6bc4; } .noalin { background: #b07800; }
+.apiladas { display: flex; flex-direction: column; gap: 6px; }
+.fila { display: grid; grid-template-columns: minmax(140px, 32%) 1fr 54px; gap: 10px; align-items: center; }
+.etq { font-size: 0.8rem; color: v.$gris-700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pista { display: flex; gap: 2px; height: 14px; }
+.seg { height: 14px; &:first-child { border-radius: 0; } &:last-child { border-radius: 0 4px 4px 0; } }
+.val { font-size: 0.8rem; font-weight: 700; color: v.$gris-900; text-align: right; }
+.vacio { color: v.$gris-500; font-style: italic; }

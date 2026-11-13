@@ -1,0 +1,57 @@
+<mat-card class="auth-card" appearance="outlined">
+  <h2>Crear cuenta</h2>
+  <p class="sub">Regístrate para crear y administrar tu hoja de vida.</p>
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+    <div class="fila">
+      <mat-form-field>
+        <mat-label>Nombres</mat-label>
+        <input matInput formControlName="nombres" autocomplete="given-name" required />
+        <mat-error>{{ form.controls.nombres.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Apellidos</mat-label>
+        <input matInput formControlName="apellidos" autocomplete="family-name" required />
+        <mat-error>{{ form.controls.apellidos.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field>
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" required />
+      <mat-error>{{ form.controls.email.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Contraseña</mat-label>
+      <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" required />
+      <button mat-icon-button matSuffix type="button" (click)="verPassword.set(!verPassword())"
+        [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+        <mat-icon>{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-hint>Mínimo 8 caracteres, una mayúscula y un número.</mat-hint>
+      <mat-error>{{ form.controls.password.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Confirmar contraseña</mat-label>
+      <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="confirmarPassword" autocomplete="new-password" required />
+      <mat-error>{{ form.controls.confirmarPassword.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="aceptaTerminos">
+      Acepto el tratamiento de mis datos personales (Ley 1581 de 2012).
+    </mat-checkbox>
+    <app-field-error [control]="form.controls.aceptaTerminos" />
+
+    <div class="acciones">
+      <button mat-flat-button type="submit" [disabled]="enviando()">
+        <mat-icon>person_add</mat-icon> Registrarme
+      </button>
+    </div>
+  </form>
+
+  <div class="links">
+    <span>¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></span>
+  </div>
+</mat-card>

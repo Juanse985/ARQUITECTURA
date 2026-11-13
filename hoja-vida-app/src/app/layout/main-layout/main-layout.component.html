@@ -1,0 +1,98 @@
+<a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+
+<mat-toolbar class="toolbar" role="banner">
+  <button mat-icon-button (click)="sidenav.toggle()" aria-label="Abrir o cerrar el menú" matTooltip="Menú">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <a [routerLink]="auth.esAdmin() ? '/admin' : '/inicio'" class="marca" aria-label="Ir al inicio">
+    <app-logo-placeholder [variante]="esMovil() ? 'icono' : 'completo'" />
+    @if (!esMovil()) {
+      <span class="separador" aria-hidden="true"></span>
+      <span class="nombre">
+        <strong>{{ app.appName }}</strong>
+        <small>{{ app.appFullName }}</small>
+      </span>
+    }
+  </a>
+  <span class="spacer"></span>
+  <button mat-button class="usuario" [matMenuTriggerFor]="menuUsuario" aria-label="Menú de usuario">
+    <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
+    @if (!esMovil()) {
+      <span>{{ auth.nombreCorto() }}</span>
+    }
+    <mat-icon>expand_more</mat-icon>
+  </button>
+  <mat-menu #menuUsuario="matMenu" xPosition="before">
+    <div class="menu-header" mat-menu-item disabled>
+      <small>{{ auth.usuario()?.email }} · {{ auth.esAdmin() ? 'Administrador' : 'Usuario' }}</small>
+    </div>
+    <mat-divider />
+    <a mat-menu-item routerLink="/perfil"><mat-icon>person</mat-icon>Mi cuenta (datos y contraseña)</a>
+    <button mat-menu-item (click)="cerrarSesion()"><mat-icon>logout</mat-icon>Cerrar sesión</button>
+  </mat-menu>
+</mat-toolbar>
+
+<mat-sidenav-container class="contenedor">
+  <mat-sidenav
+    #sidenav
+    [mode]="esMovil() ? 'over' : 'side'"
+    [opened]="!esMovil()"
+    class="sidenav"
+    role="navigation"
+    aria-label="Menú principal"
+  >
+    <mat-nav-list>
+      <!-- El menú personal (hoja de vida) solo lo ve el usuario; el administrador usa su propio menú. -->
+      @if (!auth.esAdmin()) {
+      @for (item of menu; track item.ruta) {
+        <a
+          mat-list-item
+          [routerLink]="item.ruta"
+          routerLinkActive="activo"
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: !!item.exacto }"
+          [activated]="rla.isActive"
+          (click)="cerrarMenuSiMovil()"
+        >
+          <mat-icon matListItemIcon>{{ item.icono }}</mat-icon>
+          <span matListItemTitle>{{ item.etiqueta }}</span>
+        </a>
+      }
+      }
+      @if (auth.esAdmin()) {
+        <div mat-subheader class="subheader">Administración</div>
+        @for (item of menuAdmin; track item.ruta) {
+          <a
+            mat-list-item
+            [routerLink]="item.ruta"
+            routerLinkActive="activo"
+            #rla2="routerLinkActive"
+            [routerLinkActiveOptions]="{ exact: !!item.exacto }"
+            [activated]="rla2.isActive"
+            (click)="cerrarMenuSiMovil()"
+          >
+            <mat-icon matListItemIcon>{{ item.icono }}</mat-icon>
+            <span matListItemTitle>{{ item.etiqueta }}</span>
+          </a>
+        }
+      }
+      <mat-divider />
+      <a mat-list-item (click)="cerrarSesion()" (keydown.enter)="cerrarSesion()" tabindex="0" role="button">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Cerrar sesión</span>
+      </a>
+    </mat-nav-list>
+    <div class="sidenav-nota">
+      <mat-icon>info</mat-icon>
+      <small>Formato Único de Hoja de Vida – Persona Natural</small>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="contenido">
+    <main id="contenido-principal" class="page-container" tabindex="-1">
+      <app-breadcrumb />
+      <router-outlet />
+    </main>
+    <app-footer />
+  </mat-sidenav-content>
+</mat-sidenav-container>

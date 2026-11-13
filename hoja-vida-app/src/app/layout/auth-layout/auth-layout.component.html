@@ -1,0 +1,52 @@
+<div class="auth">
+  <section class="hero" aria-labelledby="titulo-hero">
+    <!-- Decoración (solo CSS) -->
+    <span class="burbuja b1" aria-hidden="true"></span>
+    <span class="burbuja b2" aria-hidden="true"></span>
+    <span class="burbuja b3" aria-hidden="true"></span>
+    <span class="malla" aria-hidden="true"></span>
+
+    <div class="contenido">
+      <div class="marca">
+        <app-logo-placeholder [grande]="true" variante="completo" />
+      </div>
+
+      <span class="etiqueta"><mat-icon>verified</mat-icon> Plataforma institucional · {{ inst.sigla() }}</span>
+
+      <h1 id="titulo-hero">
+        Tu hoja de vida,<br />
+        <span class="resaltado">lista en minutos.</span>
+      </h1>
+      <p class="sub">
+        <strong>{{ app.appName }}</strong> · {{ app.appFullName }}. Crea, administra e imprime tu
+        <b>Formato Único de Hoja de Vida – Persona Natural</b> desde un solo lugar.
+      </p>
+
+      <ul class="beneficios">
+        @for (b of beneficios; track b.titulo; let i = $index) {
+          <li [style.animation-delay.ms]="150 + i * 120">
+            <span class="ico"><mat-icon>{{ b.icono }}</mat-icon></span>
+            <span class="txt">
+              <b>{{ b.titulo }}</b>
+              <small>{{ b.texto }}</small>
+            </span>
+          </li>
+        }
+      </ul>
+
+      <div class="cifras" aria-label="Datos de la plataforma">
+        <div><strong>7</strong><span>pasos guiados</span></div>
+        <div><strong>{{ inst.sedes().length || 25 }}</strong><span>sedes en Colombia</span></div>
+        <div><strong>100%</strong><span>en línea</span></div>
+      </div>
+
+      <p class="pie">
+        <mat-icon>lock</mat-icon> Tus datos se tratan conforme a la Ley 1581 de 2012 · © {{ anio }} {{ inst.nombre() }}
+      </p>
+    </div>
+  </section>
+
+  <main class="panel">
+    <router-outlet />
+  </main>
+</div>

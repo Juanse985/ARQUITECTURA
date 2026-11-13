@@ -1,0 +1,144 @@
+<div class="no-print">
+  <app-page-title
+    [titulo]="existe() ? 'Editar hoja de vida' : 'Crear hoja de vida'"
+    subtitulo="Formato Único de Hoja de Vida – Persona Natural (Ley 190 de 1995, Leyes 489 y 443 de 1998)"
+    icono="edit_note"
+  >
+    @if (form.dirty) {
+      <span class="chip chip-accent" role="status"><mat-icon inline>edit</mat-icon> Cambios sin guardar</span>
+    } @else if (ultimoGuardado()) {
+      <span class="chip" role="status"><mat-icon inline>cloud_done</mat-icon> Guardado</span>
+    }
+    <a mat-stroked-button routerLink="/hoja-vida/importar"><mat-icon>auto_awesome</mat-icon> Importar HV con IA</a>
+    <button mat-button type="button" (click)="descartar()" [disabled]="!form.dirty">
+      <mat-icon>undo</mat-icon> Descartar
+    </button>
+  </app-page-title>
+</div>
+
+@if (cargado()) {
+  <mat-card appearance="outlined" class="contenedor">
+    <mat-stepper
+      #stepper
+      [linear]="!existe()"
+      [orientation]="vertical() ? 'vertical' : 'horizontal'"
+      [selectedIndex]="indice()"
+      (selectionChange)="alCambiarPaso($event.selectedIndex)"
+      labelPosition="bottom"
+      aria-label="Pasos del formulario de hoja de vida"
+    >
+      <!-- Íconos personalizados -->
+      <ng-template matStepperIcon="edit"><mat-icon>edit</mat-icon></ng-template>
+      <ng-template matStepperIcon="done"><mat-icon>check</mat-icon></ng-template>
+
+      <!-- PASO 1 -->
+      <mat-step [stepControl]="f.datosPersonales" [completed]="!paso1Invalido()">
+        <ng-template matStepLabel>
+          <span class="lbl">{{ titulosPasos[0] }}</span>
+          <small class="pct">{{ porcentajePaso(0) }}%</small>
+        </ng-template>
+        <app-paso1-datos-personales [form]="f.datosPersonales" [institucional]="f.institucional" [porcentaje]="porcentajePaso(0)" />
+        <div class="step-actions no-print">
+          <span class="spacer"></span>
+          <button mat-flat-button type="button" (click)="siguiente(stepper, validarPaso1())" [disabled]="paso1Invalido() || guardando()">
+            Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 2 -->
+      <mat-step [stepControl]="f.formacion" [completed]="f.formacion.valid">
+        <ng-template matStepLabel>
+          <span class="lbl">{{ titulosPasos[1] }}</span>
+          <small class="pct">{{ porcentajePaso(1) }}%</small>
+        </ng-template>
+        <app-paso2-formacion [form]="f.formacion" [porcentaje]="porcentajePaso(1)" />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button type="button" (click)="siguiente(stepper, f.formacion)" [disabled]="f.formacion.invalid || guardando()">
+            Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 3 -->
+      <mat-step [stepControl]="f.experiencia" [completed]="f.experiencia.valid">
+        <ng-template matStepLabel>
+          <span class="lbl">{{ titulosPasos[2] }}</span>
+          <small class="pct">{{ porcentajePaso(2) }}%</small>
+        </ng-template>
+        <app-paso3-experiencia [form]="f.experiencia" [porcentaje]="porcentajePaso(2)" />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button type="button" (click)="siguiente(stepper, f.experiencia)" [disabled]="f.experiencia.invalid || guardando()">
+            Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 4 -->
+      <mat-step [stepControl]="f.tiempo" [completed]="f.tiempo.valid">
+        <ng-template matStepLabel>
+          <span class="lbl">{{ titulosPasos[3] }}</span>
+        </ng-template>
+        <app-paso4-tiempo [form]="f.tiempo" [experiencia]="f.experiencia" />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button type="button" (click)="siguiente(stepper, f.tiempo)" [disabled]="f.tiempo.invalid || guardando()">
+            Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 5 -->
+      <mat-step [stepControl]="f.declaracion" [completed]="f.declaracion.valid">
+        <ng-template matStepLabel>
+          <span class="lbl">{{ titulosPasos[4] }}</span>
+          <small class="pct">{{ porcentajePaso(4) }}%</small>
+        </ng-template>
+        <app-paso5-declaracion [form]="f.declaracion" [porcentaje]="porcentajePaso(4)" />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button type="button" (click)="siguiente(stepper, f.declaracion)" [disabled]="f.declaracion.invalid || guardando()">
+            Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 6 -->
+      <mat-step [completed]="true" [optional]="false">
+        <ng-template matStepLabel><span class="lbl">{{ titulosPasos[5] }}</span></ng-template>
+        <app-paso6-observaciones-rrhh />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button matStepperNext type="button">Siguiente <mat-icon iconPositionEnd>arrow_forward</mat-icon></button>
+        </div>
+      </mat-step>
+
+      <!-- PASO 7 -->
+      <mat-step>
+        <ng-template matStepLabel><span class="lbl">{{ titulosPasos[6] }}</span></ng-template>
+        <app-paso7-resumen
+          [vistaPrevia]="vistaPrevia()"
+          [completitud]="completitud()"
+          [invalidas]="seccionesInvalidas()"
+          (guardar)="guardarFinal()"
+          (imprimir)="imprimir()"
+          (irAPaso)="indice.set($event)"
+        />
+        <div class="step-actions no-print">
+          <button mat-button matStepperPrevious type="button"><mat-icon>arrow_back</mat-icon> Anterior</button>
+          <span class="spacer"></span>
+          <button mat-flat-button class="btn-accent" type="button" (click)="guardarFinal()" [disabled]="guardando()">
+            <mat-icon>save</mat-icon> Guardar
+          </button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  </mat-card>
+}

@@ -1,0 +1,52 @@
+<app-seccion-header
+  numero="4"
+  titulo="Tiempo total de experiencia"
+  descripcion="Indique el tiempo total de su experiencia laboral en número de años y meses."
+/>
+
+<p class="info">
+  <mat-icon aria-hidden="true">calculate</mat-icon>
+  <span>Los tiempos de <b>servidor público</b> (entidades públicas) y <b>empleado del sector privado</b> se calculan
+  automáticamente con las fechas del paso 3. Solo debe diligenciar el tiempo como <b>trabajador independiente</b>.</span>
+</p>
+
+<div class="tabla-wrap" [formGroup]="form().controls.independiente">
+  <table mat-table [dataSource]="filas" class="tabla" aria-label="Tiempo total de experiencia">
+    <ng-container matColumnDef="ocupacion">
+      <th mat-header-cell *matHeaderCellDef scope="col">Ocupación</th>
+      <td mat-cell *matCellDef="let f">{{ f.ocupacion }}</td>
+    </ng-container>
+    <ng-container matColumnDef="anios">
+      <th mat-header-cell *matHeaderCellDef scope="col">Años</th>
+      <td mat-cell *matCellDef="let f">
+        @if (f.editable) {
+          <mat-form-field class="mini" subscriptSizing="dynamic">
+            <input matInput type="number" min="0" max="70" formControlName="anios" appSoloNumeros aria-label="Años como trabajador independiente" />
+            <mat-error>{{ form().controls.independiente.controls.anios.errors | errorMsg }}</mat-error>
+          </mat-form-field>
+        } @else {
+          <span class="valor">{{ valor(f.clave, "anios") }}</span>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="meses">
+      <th mat-header-cell *matHeaderCellDef scope="col">Meses</th>
+      <td mat-cell *matCellDef="let f">
+        @if (f.editable) {
+          <mat-form-field class="mini" subscriptSizing="dynamic">
+            <input matInput type="number" min="0" max="11" formControlName="meses" appSoloNumeros aria-label="Meses como trabajador independiente" />
+            <mat-error>{{ form().controls.independiente.controls.meses.errors | errorMsg }}</mat-error>
+          </mat-form-field>
+        } @else {
+          <span class="valor">{{ valor(f.clave, "meses") }}</span>
+        }
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnas" [class.total]="row.clave === 'total'" [class.editable]="row.editable"></tr>
+  </table>
+</div>
+
+@if (experiencia().controls.items.errors?.['cruceFechas']) {
+  <p class="alerta" role="alert"><mat-icon>warning</mat-icon> Hay experiencias con fechas cruzadas en el paso 3; el total puede no ser exacto.</p>
+}

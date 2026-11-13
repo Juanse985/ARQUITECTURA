@@ -1,0 +1,26 @@
+@use 'variables' as v;
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;
+  @media (max-width: v.$bp-tablet) { grid-template-columns: 1fr; } }
+mat-card { padding: 20px; }
+h2 { font-size: 1rem; color: v.$azul-800; margin: 12px 0 8px; }
+h3 { font-size: 0.9rem; color: v.$azul-700; margin: 14px 0 4px; }
+.zona { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 28px 16px; border: 2px dashed v.$gris-300; border-radius: 14px; cursor: pointer; background: v.$azul-50; transition: 0.15s;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; color: v.$azul-700; }
+  small { color: v.$gris-500; }
+  input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  &.activa, &:hover, &:focus-within { border-color: v.$dorado-500; background: v.$dorado-100; } }
+.archivo { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid v.$gris-300;
+  .info { flex: 1; display: flex; flex-direction: column; } small { color: v.$gris-500; } mat-icon { color: v.$azul-800; } }
+.modo { display: flex; flex-direction: column; gap: 4px; small { color: v.$gris-500; } }
+.check { display: block; ::ng-deep label { white-space: normal; line-height: 1.4; } }
+.procesando { margin-top: 16px; p { display: flex; align-items: center; gap: 6px; color: v.$azul-800; } }
+.acciones { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.aviso { color: v.$rojo; font-size: 0.85rem; }
+.ok { display: flex; align-items: center; gap: 6px; color: v.$verde; }
+dl { display: grid; grid-template-columns: 110px 1fr; gap: 4px 10px; margin: 0; dt { color: v.$gris-500; font-size: 0.8rem; } dd { margin: 0; } }
+ul { margin: 0; padding-left: 18px; li { margin: 3px 0; } }
+.vacio { color: v.$gris-500; font-style: italic; list-style: none; margin-left: -18px; }
+.placeholder { text-align: center; color: v.$gris-700; padding: 32px 8px;
+  mat-icon { font-size: 56px; width: 56px; height: 56px; color: v.$gris-300; } small { color: v.$gris-500; } }

@@ -1,0 +1,51 @@
+<mat-card class="auth-card" appearance="outlined">
+  <h2>Iniciar sesión</h2>
+  <p class="sub">Ingresa para administrar tu hoja de vida.</p>
+
+  @if (sesion() === 'expirada') {
+    <div class="aviso" role="alert">Tu sesión expiró. Inicia sesión nuevamente.</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+    <mat-form-field>
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" required />
+      <mat-icon matSuffix aria-hidden="true">mail</mat-icon>
+      <mat-error>{{ form.controls.email.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Contraseña</mat-label>
+      <input matInput [type]="verPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" required />
+      <button mat-icon-button matSuffix type="button" (click)="verPassword.set(!verPassword())"
+        [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+        <mat-icon>{{ verPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error>{{ form.controls.password.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+
+    <div class="acciones">
+      <button mat-flat-button type="submit" class="btn-ingresar" [disabled]="enviando()">
+        <img class="md" src="branding/uniminuto-md-transparente.png" alt="" aria-hidden="true" /> Ingresar
+      </button>
+    </div>
+  </form>
+
+  <div class="links">
+    <a routerLink="/auth/recuperar">¿Olvidaste tu contraseña?</a>
+    <a routerLink="/auth/registro">Crear una cuenta</a>
+  </div>
+
+  @if (modoDemo) {
+    <div class="demo">
+      <mat-icon aria-hidden="true">science</mat-icon>
+      <span>
+        Modo demostración (sin backend).<br />
+        Usuario: <b>demo&#64;uniminuto.edu.co</b> / <b>Demo1234</b> ·
+        <a href="" (click)="$event.preventDefault(); usarDemo()">Usar datos demo</a><br />
+        Administrador: <b>admin&#64;uniminuto.edu.co</b> / <b>Admin1234</b> ·
+        <a href="" (click)="$event.preventDefault(); usarDemo(true)">Usar admin demo</a>
+      </span>
+    </div>
+  }
+</mat-card>

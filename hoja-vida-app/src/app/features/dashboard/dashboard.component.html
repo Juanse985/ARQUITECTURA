@@ -1,0 +1,81 @@
+<app-page-title
+  [titulo]="saludo() + ', ' + (auth.usuario()?.nombres ?? '')"
+  subtitulo="Este es el estado de tu Formato Único de Hoja de Vida – Persona Natural."
+  icono="waving_hand"
+/>
+
+<section class="resumen" aria-labelledby="titulo-estado">
+  <mat-card appearance="outlined" class="estado">
+    <div class="circulo" [attr.aria-label]="'Completitud total ' + hv.porcentajeTotal() + '%'" role="img">
+      <svg viewBox="0 0 36 36" aria-hidden="true">
+        <path class="fondo" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        <path class="avance" [attr.stroke-dasharray]="hv.porcentajeTotal() + ', 100'"
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+      </svg>
+      <span>{{ hv.porcentajeTotal() }}%</span>
+    </div>
+    <div class="info">
+      <h2 id="titulo-estado">Estado de tu hoja de vida</h2>
+      @if (hv.hojaVida(); as h) {
+        <p>
+          <span class="chip" [class.chip-accent]="h.estado === 'BORRADOR'">{{ h.estado === 'COMPLETA' ? 'Completa' : 'Borrador' }}</span>
+          Última actualización: <b>{{ h.fechaActualizacion | date: 'dd/MM/yyyy h:mm a' }}</b>
+        </p>
+      } @else {
+        <p>Aún no has creado tu hoja de vida. ¡Empieza ahora!</p>
+      }
+      <div class="botones">
+        <a mat-flat-button routerLink="/hoja-vida/editar">
+          <mat-icon>{{ hv.hojaVida() ? 'edit' : 'add' }}</mat-icon>
+          {{ hv.hojaVida() ? 'Continuar diligenciando' : 'Crear hoja de vida' }}
+        </a>
+        @if (hv.hojaVida()) {
+          <a mat-flat-button class="btn-accent" routerLink="/hoja-vida/formato"><mat-icon>print</mat-icon> Ver formato</a>
+        }
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="secciones">
+    <h2>Completitud por sección</h2>
+    <ul>
+      @for (s of hv.completitud(); track s.seccion) {
+        <li>
+          <div class="fila">
+            <span class="num">{{ s.numero }}</span>
+            <span class="titulo">{{ s.titulo }}</span>
+            <span class="pct" [class]="colorPorcentaje(s.porcentaje)">{{ s.porcentaje }}%</span>
+            <a mat-icon-button [routerLink]="['/hoja-vida/editar']" [queryParams]="{ paso: s.paso }" [attr.aria-label]="'Editar ' + s.titulo">
+              <mat-icon>edit</mat-icon>
+            </a>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="s.porcentaje" [attr.aria-label]="'Avance de ' + s.titulo" />
+        </li>
+      }
+    </ul>
+  </mat-card>
+</section>
+
+<h2 class="section-title"><mat-icon>bolt</mat-icon> Accesos rápidos</h2>
+<section class="accesos">
+  @if (auth.esAdmin()) {
+    @for (a of accesosAdmin; track a.ruta) {
+      <a class="acceso admin" [routerLink]="a.ruta">
+        <mat-card appearance="outlined">
+          <mat-icon class="icono">{{ a.icono }}</mat-icon>
+          <h3>{{ a.titulo }}</h3>
+          <p>{{ a.descripcion }}</p>
+        </mat-card>
+      </a>
+    }
+  }
+  @for (a of accesos; track a.ruta) {
+    <a class="acceso" [routerLink]="a.ruta">
+      <mat-card appearance="outlined">
+        <mat-icon class="icono">{{ a.icono }}</mat-icon>
+        <h3>{{ a.titulo }}</h3>
+        <p>{{ a.descripcion }}</p>
+      </mat-card>
+    </a>
+  }
+</section>

@@ -1,0 +1,188 @@
+@let f = form();
+<app-seccion-header numero="2" titulo="Formación académica" descripcion="Educación básica y media, educación superior e idiomas." [porcentaje]="porcentaje()" />
+
+<!-- ===================== EDUCACIÓN BÁSICA Y MEDIA ===================== -->
+<h3 class="section-title">Educación básica y media</h3>
+<div [formGroup]="f.controls.educacionBasica">
+  <span class="radio-label" id="lbl-grado">Marque con una X el último grado aprobado (los grados de 1º a 6º de bachillerato equivalen a 6º a 11º de educación básica secundaria y media) *</span>
+  <mat-radio-group formControlName="ultimoGrado" class="grados" aria-labelledby="lbl-grado">
+    @for (grupo of catalogos.gruposGrados; track grupo.nombre) {
+      <fieldset>
+        <legend>{{ grupo.nombre }}</legend>
+        @for (g of grupo.grados; track g.valor) {
+          <mat-radio-button [value]="g.valor" [attr.aria-label]="'Grado ' + g.etiqueta + ' de ' + grupo.nombre">{{ g.etiqueta }}</mat-radio-button>
+        }
+      </fieldset>
+    }
+  </mat-radio-group>
+  <app-field-error [control]="f.controls.educacionBasica.controls.ultimoGrado" />
+
+  <div class="form-grid">
+    <mat-form-field class="col-6">
+      <mat-label>Título obtenido</mat-label>
+      <input matInput formControlName="titulo" placeholder="Ej.: Bachiller académico" />
+      <mat-error>{{ f.controls.educacionBasica.controls.titulo.errors | errorMsg }}</mat-error>
+    </mat-form-field>
+    <mat-form-field class="col-3">
+      <mat-label>Mes de grado</mat-label>
+      <mat-select formControlName="mesGrado">
+        <mat-option [value]="null">—</mat-option>
+        @for (m of catalogos.meses; track m.valor) {
+          <mat-option [value]="m.valor">{{ m.etiqueta }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="col-3">
+      <mat-label>Año de grado</mat-label>
+      <mat-select formControlName="anioGrado">
+        <mat-option [value]="null">—</mat-option>
+        @for (a of catalogos.anios; track a) {
+          <mat-option [value]="a">{{ a }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<!-- ===================== EDUCACIÓN SUPERIOR ===================== -->
+<h3 class="section-title">Educación superior (pregrado y posgrado)</h3>
+<p class="ayuda">
+  Diligencie en orden cronológico. Modalidad:
+  @for (m of catalogos.modalidades; track m.valor; let ultimo = $last) {
+    <b>{{ m.etiqueta }}</b> ({{ m.descripcion }}){{ ultimo ? '.' : ', ' }}
+  }
+  El formato impreso trae {{ filas.educacionSuperior }} filas; aquí puede agregar las que necesite.
+</p>
+
+@for (est of f.controls.educacionSuperior.controls; track est; let i = $index) {
+  <mat-card appearance="outlined" class="item" [formGroup]="est">
+    <div class="item-cab">
+      <span class="chip">Estudio {{ i + 1 }}</span>
+      <span class="spacer"></span>
+      <button mat-icon-button type="button" (click)="eliminarEstudio(i)" matTooltip="Eliminar estudio" [attr.aria-label]="'Eliminar estudio ' + (i + 1)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+    <div class="form-grid">
+      <mat-form-field class="col-4">
+        <mat-label>Modalidad académica</mat-label>
+        <mat-select formControlName="modalidad" required>
+          @for (m of catalogos.modalidades; track m.valor) {
+            <mat-option [value]="m.valor">{{ m.etiqueta }} – {{ m.descripcion }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ est.controls.modalidad.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>No. de semestres aprobados</mat-label>
+        <input matInput type="number" min="0" max="20" formControlName="semestresAprobados" required />
+        <mat-error>{{ est.controls.semestresAprobados.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <div class="col-4">
+        <span class="radio-label" [id]="'lbl-grad-' + i">Graduado *</span>
+        <mat-radio-group formControlName="graduado" class="radio-group-row" [attr.aria-labelledby]="'lbl-grad-' + i">
+          @for (o of catalogos.opcionesSiNo; track o.valor) {
+            <mat-radio-button [value]="o.valor">{{ o.etiqueta }}</mat-radio-button>
+          }
+        </mat-radio-group>
+        <app-field-error [control]="est.controls.graduado" />
+      </div>
+      <mat-form-field class="col-12">
+        <mat-label>Nombre de los estudios o título obtenido</mat-label>
+        <input matInput formControlName="titulo" required />
+        <mat-error>{{ est.controls.titulo.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-8">
+        <mat-label>Institución educativa</mat-label>
+        <input matInput formControlName="institucion" [matAutocomplete]="autoIes" (input)="buscarIes(est.controls.institucion.value)" (focus)="buscarIes(est.controls.institucion.value)" />
+        <mat-icon matSuffix aria-hidden="true">account_balance</mat-icon>
+        <mat-autocomplete #autoIes="matAutocomplete">
+          @for (ies of sugerenciasIes(); track ies.nombre) {
+            <mat-option [value]="ies.nombre">{{ ies.nombre }} @if (ies.sigla) { <small>({{ ies.sigla }})</small> }</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint>Escriba al menos 2 letras (catálogo de IES)</mat-hint>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Área de conocimiento</mat-label>
+        <mat-select formControlName="areaConocimiento">
+          <mat-option [value]="null">—</mat-option>
+          @for (a of inst.areas; track a.valor) {
+            <mat-option [value]="a.valor">{{ a.etiqueta }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Terminación – mes</mat-label>
+        <mat-select formControlName="mesTerminacion" [required]="est.controls.graduado.value === true">
+          <mat-option [value]="null">—</mat-option>
+          @for (m of catalogos.meses; track m.valor) {
+            <mat-option [value]="m.valor">{{ m.etiqueta }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ est.controls.mesTerminacion.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>Terminación – año</mat-label>
+        <mat-select formControlName="anioTerminacion" [required]="est.controls.graduado.value === true">
+          <mat-option [value]="null">—</mat-option>
+          @for (a of catalogos.anios; track a) {
+            <mat-option [value]="a">{{ a }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ est.controls.anioTerminacion.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="col-4">
+        <mat-label>No. de tarjeta profesional</mat-label>
+        <input matInput formControlName="tarjetaProfesional" />
+      </mat-form-field>
+    </div>
+  </mat-card>
+} @empty {
+  <p class="vacio"><mat-icon>school</mat-icon> No has registrado estudios de educación superior.</p>
+}
+<button mat-stroked-button type="button" class="agregar" (click)="agregarEstudio()">
+  <mat-icon>add</mat-icon> Agregar estudio
+</button>
+
+<!-- ===================== IDIOMAS ===================== -->
+<h3 class="section-title">Idiomas diferentes al español</h3>
+<p class="ayuda">Especifique los idiomas que habla, lee o escribe: <b>R</b> = Regular, <b>B</b> = Bien, <b>MB</b> = Muy bien.</p>
+
+@for (idi of f.controls.idiomas.controls; track idi; let i = $index) {
+  <mat-card appearance="outlined" class="item" [formGroup]="idi">
+    <div class="idioma">
+      <mat-form-field class="nombre">
+        <mat-label>Idioma</mat-label>
+        <input matInput formControlName="idioma" [matAutocomplete]="auto" required />
+        <mat-autocomplete #auto="matAutocomplete">
+          @for (op of idiomasFiltrados(idi.controls.idioma.value); track op) {
+            <mat-option [value]="op">{{ op }}</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-error>{{ idi.controls.idioma.errors | errorMsg }}</mat-error>
+      </mat-form-field>
+
+      @for (hab of [{ c: 'habla', l: 'Lo habla' }, { c: 'lee', l: 'Lo lee' }, { c: 'escribe', l: 'Lo escribe' }]; track hab.c) {
+        <div class="habilidad">
+          <span class="radio-label" [id]="'lbl-' + hab.c + '-' + i">{{ hab.l }} *</span>
+          <mat-radio-group [formControlName]="hab.c" class="radio-group-row" [attr.aria-labelledby]="'lbl-' + hab.c + '-' + i">
+            @for (n of catalogos.nivelesIdioma; track n.valor) {
+              <mat-radio-button [value]="n.valor" [attr.title]="n.descripcion">{{ n.etiqueta }}</mat-radio-button>
+            }
+          </mat-radio-group>
+          <app-field-error [control]="idi.get(hab.c)" />
+        </div>
+      }
+
+      <button mat-icon-button type="button" (click)="eliminarIdioma(i)" matTooltip="Eliminar idioma" [attr.aria-label]="'Eliminar idioma ' + (i + 1)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-card>
+} @empty {
+  <p class="vacio"><mat-icon>translate</mat-icon> No has registrado idiomas.</p>
+}
+<button mat-stroked-button type="button" class="agregar" (click)="agregarIdioma()">
+  <mat-icon>add</mat-icon> Agregar idioma
+</button>

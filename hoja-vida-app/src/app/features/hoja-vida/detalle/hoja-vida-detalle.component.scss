@@ -1,0 +1,34 @@
+@use 'variables' as v;
+
+.estado { display: grid; grid-template-columns: auto auto 1fr; gap: 12px; align-items: center; margin-bottom: 16px; }
+.seccion { padding: 16px 20px; margin-bottom: 16px; }
+.cab { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; .spacer { flex: 1; } }
+.num { width: 30px; height: 30px; border-radius: 8px; background: v.$azul-800; color: v.$dorado-500;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; }
+h2 { margin: 0; font-size: 1.1rem; color: v.$azul-800; }
+h3 { margin: 16px 0 6px; font-size: 0.95rem; color: v.$azul-700; }
+.perfil { display: flex; gap: 20px; flex-wrap: wrap; }
+.foto { width: 110px; height: 140px; border-radius: 10px; overflow: hidden; background: v.$azul-100;
+  display: flex; align-items: center; justify-content: center;
+  img { width: 100%; height: 100%; object-fit: cover; } mat-icon { font-size: 72px; width: 72px; height: 72px; color: v.$azul-700; } }
+.datos { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 20px; margin: 0;
+  dt { font-size: 0.75rem; color: v.$gris-500; text-transform: uppercase; font-weight: 600; }
+  dd { margin: 0; font-weight: 500; } }
+.tabla-wrap { overflow-x: auto; border: 1px solid v.$gris-300; border-radius: 10px; }
+table { width: 100%; }
+th.mat-mdc-header-cell { background: v.$azul-50 !important; color: v.$azul-800 !important; font-weight: 700; }
+.borrar { color: v.$rojo; }
+.vacio { color: v.$gris-500; font-style: italic; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; @media (max-width: v.$bp-tablet) { grid-template-columns: 1fr; } }
+.tiempo { list-style: none; padding: 0; margin: 0;
+  li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed v.$gris-300; }
+  .total { border-bottom: none; color: v.$azul-800; font-size: 1.05rem; } }
+.firma { max-height: 70px; border-bottom: 1px solid v.$gris-700; }
+.zona-riesgo { display: flex; justify-content: flex-end; button { color: v.$rojo; border-color: v.$rojo; } }
+.vacia { text-align: center; padding: 48px 24px;
+  mat-icon { font-size: 64px; width: 64px; height: 64px; color: v.$azul-800; margin: 0 auto; }
+  h2 { margin-top: 12px; } p { color: v.$gris-700; } a { align-self: center; } }
+
+.ico { color: v.$azul-800; }
+.ies { color: v.$gris-500; }
+.botones { display: flex; gap: 8px; flex-wrap: wrap; }

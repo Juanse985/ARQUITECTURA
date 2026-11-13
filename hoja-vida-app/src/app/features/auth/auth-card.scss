@@ -1,0 +1,26 @@
+@use 'variables' as v;
+
+:host { width: 100%; max-width: 460px; }
+.auth-card {
+  padding: 28px 28px 20px;
+  border-top: 5px solid v.$azul-800;
+  box-shadow: v.$sombra-suave;
+}
+h2 { margin: 0; color: v.$azul-800; font-size: 1.5rem; }
+.sub { margin: 4px 0 20px; color: v.$gris-700; }
+form { display: flex; flex-direction: column; gap: 4px; }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 600px) { .fila { grid-template-columns: 1fr; } }
+.acciones { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.acciones button { height: 46px; font-size: 1rem; }
+.links { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 16px; font-size: 0.9rem; }
+.demo {
+  margin-top: 16px; padding: 10px 12px; border-radius: 10px; background: v.$dorado-100;
+  font-size: 0.82rem; color: #6b4f00; display: flex; gap: 8px; align-items: flex-start;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+.aviso { padding: 10px 12px; border-radius: 10px; background: #fdecea; color: v.$rojo; margin-bottom: 12px; font-size: 0.9rem; }
+
+.btn-ingresar { border-radius: 28px !important; height: 52px !important; font-size: 1.1rem !important; font-weight: 700; background: #244992 !important; color: #fff !important;
+  .md { height: 30px; width: auto; margin-right: 10px; vertical-align: middle; }
+  &:disabled { opacity: 0.7; } }

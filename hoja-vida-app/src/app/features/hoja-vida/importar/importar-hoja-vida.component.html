@@ -1,0 +1,117 @@
+<app-page-title
+  titulo="Importar hoja de vida con IA"
+  subtitulo="Sube tu hoja de vida en el formato que tengas y Gemini llenará el Formato Único por ti."
+  icono="auto_awesome"
+>
+  <a mat-button routerLink="/hoja-vida/editar"><mat-icon>edit_note</mat-icon> Ir al formulario</a>
+</app-page-title>
+
+<div class="grid">
+  <mat-card appearance="outlined" class="carga">
+    <h2>1. Selecciona el archivo</h2>
+    <label
+      class="zona"
+      [class.activa]="arrastrando()"
+      (dragover)="$event.preventDefault(); arrastrando.set(true)"
+      (dragleave)="arrastrando.set(false)"
+      (drop)="soltar($event)"
+    >
+      <input type="file" accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.txt,application/pdf,image/*,text/plain" (change)="seleccionar($event)" aria-label="Seleccionar hoja de vida" />
+      <mat-icon>upload_file</mat-icon>
+      <strong>Arrastra aquí tu hoja de vida o haz clic para buscarla</strong>
+      <small>PDF · Word (.docx) · JPG/PNG (foto o escaneo) · TXT — máx. {{ maxMb }} MB</small>
+    </label>
+
+    @if (archivo(); as a) {
+      <div class="archivo">
+        <mat-icon>{{ formato() === 'PDF' ? 'picture_as_pdf' : formato() === 'IMAGEN' ? 'image' : 'description' }}</mat-icon>
+        <div class="info">
+          <b>{{ a.name }}</b>
+          <small>{{ formato() }} · {{ tamanoKb(a.size) }}</small>
+        </div>
+        <button mat-icon-button type="button" (click)="quitar()" aria-label="Quitar archivo"><mat-icon>close</mat-icon></button>
+      </div>
+    }
+
+    <h2>2. Cómo aplicar los datos</h2>
+    <mat-radio-group [(ngModel)]="modo" class="modo" aria-label="Modo de combinación">
+      <mat-radio-button value="vacios">Solo llenar los campos vacíos <small>(recomendado: no cambia lo que ya escribiste)</small></mat-radio-button>
+      <mat-radio-button value="sobrescribir">Reemplazar con lo que diga el archivo</mat-radio-button>
+    </mat-radio-group>
+
+    <h2>3. Autorización</h2>
+    <mat-checkbox [(ngModel)]="consentimiento" class="check">
+      Autorizo enviar este documento al servicio de inteligencia artificial Google Gemini para extraer mis datos
+      (Ley 1581 de 2012). Entiendo que debo revisar la información antes de guardarla.
+    </mat-checkbox>
+
+    @if (paso() === 'procesando') {
+      <div class="procesando" role="status">
+        <mat-progress-bar mode="indeterminate" />
+        <p><mat-icon>auto_awesome</mat-icon> Gemini está leyendo tu hoja de vida… esto puede tardar unos segundos.</p>
+      </div>
+    }
+
+    <div class="acciones">
+      <button mat-stroked-button type="button" (click)="soloArchivo()" [disabled]="!archivo() || paso() === 'procesando'">
+        <mat-icon>attach_file</mat-icon> Solo adjuntar (sin IA)
+      </button>
+      <button mat-flat-button type="button" (click)="analizar()" [disabled]="!archivo() || !iaHabilitada() || paso() === 'procesando'">
+        <mat-icon>auto_awesome</mat-icon> Analizar con IA
+      </button>
+    </div>
+    @if (!iaHabilitada()) {
+      <p class="aviso">El administrador desactivó la importación con IA. Puedes adjuntar el archivo y llenar el formulario manualmente.</p>
+    }
+  </mat-card>
+
+  <mat-card appearance="outlined" class="resultado">
+    <h2>Datos encontrados</h2>
+    @if (resultado(); as r) {
+      <p class="ok"><mat-icon>check_circle</mat-icon> La IA identificó <b>{{ r.camposEncontrados }}</b> datos.</p>
+      @if (r.datosPersonales; as d) {
+        <h3>Datos personales</h3>
+        <dl>
+          <dt>Nombre</dt><dd>{{ d.nombres || '—' }} {{ d.primerApellido }} {{ d.segundoApellido }}</dd>
+          <dt>Documento</dt><dd>{{ d.tipoDocumento || '' }} {{ d.numeroDocumento || '—' }}</dd>
+          <dt>Nacimiento</dt><dd>{{ (d.fechaNacimiento | fechaCo) || '—' }}</dd>
+          <dt>Contacto</dt><dd>{{ d.email || '—' }} · {{ d.telefono || '—' }}</dd>
+          <dt>Profesión</dt><dd>{{ r.institucional?.profesion || '—' }}</dd>
+        </dl>
+      }
+      <h3>Formación ({{ r.educacionSuperior.length }})</h3>
+      <ul>
+        @for (e of r.educacionSuperior; track $index) {
+          <li><b>{{ e.modalidad }}</b> · {{ e.titulo }} @if (e.institucion) { – {{ e.institucion }} } {{ e.graduado ? '(graduado)' : '' }}</li>
+        } @empty {
+          <li class="vacio">No se encontraron estudios superiores.</li>
+        }
+      </ul>
+      <h3>Idiomas ({{ r.idiomas.length }})</h3>
+      <ul>
+        @for (i of r.idiomas; track $index) {
+          <li>{{ i.idioma }} — habla {{ i.habla }}, lee {{ i.lee }}, escribe {{ i.escribe }}</li>
+        } @empty {
+          <li class="vacio">No se encontraron idiomas.</li>
+        }
+      </ul>
+      <h3>Experiencia laboral ({{ r.experienciaLaboral.length }})</h3>
+      <ul>
+        @for (e of r.experienciaLaboral; track $index) {
+          <li><b>{{ e.cargo || 'Cargo sin identificar' }}</b> · {{ e.empresa }} ({{ (e.fechaIngreso | fechaCo) || '¿?' }} – {{ e.empleoActual ? 'actual' : ((e.fechaRetiro | fechaCo) || '¿?') }})</li>
+        } @empty {
+          <li class="vacio">No se encontró experiencia laboral.</li>
+        }
+      </ul>
+      <div class="acciones">
+        <button mat-flat-button class="btn-accent" type="button" (click)="aplicar()"><mat-icon>playlist_add_check</mat-icon> Aplicar al formulario y revisar</button>
+      </div>
+    } @else {
+      <div class="placeholder">
+        <mat-icon>manage_search</mat-icon>
+        <p>Aquí verás lo que la IA encontró en tu documento antes de aplicarlo.</p>
+        <small>La IA puede cometer errores: siempre revisa cada paso del formulario antes de guardar.</small>
+      </div>
+    }
+  </mat-card>
+</div>

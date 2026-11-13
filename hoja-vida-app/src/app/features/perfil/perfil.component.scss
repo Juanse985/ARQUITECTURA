@@ -1,0 +1,5 @@
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+form { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+.acciones { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.peligro { border-color: #f3c3c0; grid-column: 1 / -1; }
+.peligro button { color: #c62828; border-color: #c62828; }
